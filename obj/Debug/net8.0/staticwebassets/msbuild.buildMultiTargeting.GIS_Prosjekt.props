@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../build/GIS_Prosjekt.props" />
+</Project>

@@ -1,0 +1,27 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<title>title</title>
+
+<div>
+    <div id="map"></div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const map = L.map('map').setView([59.91, 10.75], 6); // Oslo
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            fetch('/geodata/skredfaresone.geojson')
+                .then(response => response.json())
+                .then(data => L.geoJSON(data).addTo(map))
+            fetch('/geodata/flomareal.geojson')
+                .then(response => response.json())
+                .then(data => L.geoJSON(data).addTo(map));
+        });
+    </script>
+}

@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "Ji/pmSemSfk=",
+  "success": true,
+  "projectFilePath": "/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/GIS_Prosjekt.csproj",
+  "expectedPackageFiles": [
+    "/Users/jesperheidenberghansen/.nuget/packages/microsoft.netcore.app.ref/8.0.13/microsoft.netcore.app.ref.8.0.13.nupkg.sha512",
+    "/Users/jesperheidenberghansen/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.13/microsoft.aspnetcore.app.ref.8.0.13.nupkg.sha512",
+    "/Users/jesperheidenberghansen/.nuget/packages/microsoft.netcore.app.host.osx-arm64/8.0.13/microsoft.netcore.app.host.osx-arm64.8.0.13.nupkg.sha512"
+  ],
+  "logs": []
+}
