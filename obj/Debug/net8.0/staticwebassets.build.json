@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "CoNQy9RsO6bcpCvC1H/34QquEmARYs5eWsbtvxnvsTs=",
+  "Hash": "uonOAFPi/nAha7NHhFsycyoTPpihILkZkpBF/iJ4Mqs=",
   "Source": "GIS_Prosjekt",
   "BasePath": "_content/GIS_Prosjekt",
   "Mode": "Default",
@@ -73,8 +73,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "sifrukmf5v",
-      "Integrity": "rKoEmuIN5WieOKd+GIxi63eKEqqezreed5ynVh4/rDg=",
+      "Fingerprint": "ftdbgbtiee",
+      "Integrity": "TXmN+InSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/css/site.css"
@@ -120,6 +120,27 @@
       "CopyToOutputDirectory": "Always",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/geodata/skredfaresone.geojson"
+    },
+    {
+      "Identity": "/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/wwwroot/js/map.js",
+      "SourceId": "GIS_Prosjekt",
+      "SourceType": "Discovered",
+      "ContentRoot": "/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/wwwroot/",
+      "BasePath": "_content/GIS_Prosjekt",
+      "RelativePath": "js/map#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "u8ovxcg8u9",
+      "Integrity": "fv1oMbAWLfl3B/UBTjrW9BcrHi+7B5ltsonJ6w/yeYU=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/js/map.js"
     },
     {
       "Identity": "/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/wwwroot/js/site.js",
@@ -1352,7 +1373,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "410"
+          "Value": "779"
         },
         {
           "Name": "Content-Type",
@@ -1360,11 +1381,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"rKoEmuIN5WieOKd+GIxi63eKEqqezreed5ynVh4/rDg=\""
+          "Value": "\"TXmN+InSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 04 Apr 2025 13:37:01 GMT"
+          "Value": "Tue, 22 Apr 2025 11:44:06 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1374,12 +1395,12 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-rKoEmuIN5WieOKd+GIxi63eKEqqezreed5ynVh4/rDg="
+          "Value": "sha256-TXmN+InSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk="
         }
       ]
     },
     {
-      "Route": "css/site.sifrukmf5v.css",
+      "Route": "css/site.ftdbgbtiee.css",
       "AssetFile": "/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/wwwroot/css/site.css",
       "Selectors": [],
       "ResponseHeaders": [
@@ -1389,7 +1410,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "410"
+          "Value": "779"
         },
         {
           "Name": "Content-Type",
@@ -1397,11 +1418,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"rKoEmuIN5WieOKd+GIxi63eKEqqezreed5ynVh4/rDg=\""
+          "Value": "\"TXmN+InSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 04 Apr 2025 13:37:01 GMT"
+          "Value": "Tue, 22 Apr 2025 11:44:06 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1411,7 +1432,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "sifrukmf5v"
+          "Value": "ftdbgbtiee"
         },
         {
           "Name": "label",
@@ -1419,7 +1440,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-rKoEmuIN5WieOKd+GIxi63eKEqqezreed5ynVh4/rDg="
+          "Value": "sha256-TXmN+InSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk="
         }
       ]
     },
@@ -1748,6 +1769,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-uHP+u2uXHHNvcHFdx/DpdMzAdbjN0BKMptCvR/KXMRQ="
+        }
+      ]
+    },
+    {
+      "Route": "js/map.js",
+      "AssetFile": "/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/wwwroot/js/map.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1336"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"fv1oMbAWLfl3B/UBTjrW9BcrHi+7B5ltsonJ6w/yeYU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 22 Apr 2025 19:44:04 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-fv1oMbAWLfl3B/UBTjrW9BcrHi+7B5ltsonJ6w/yeYU="
+        }
+      ]
+    },
+    {
+      "Route": "js/map.u8ovxcg8u9.js",
+      "AssetFile": "/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/wwwroot/js/map.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1336"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"fv1oMbAWLfl3B/UBTjrW9BcrHi+7B5ltsonJ6w/yeYU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 22 Apr 2025 19:44:04 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "u8ovxcg8u9"
+        },
+        {
+          "Name": "label",
+          "Value": "js/map.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-fv1oMbAWLfl3B/UBTjrW9BcrHi+7B5ltsonJ6w/yeYU="
         }
       ]
     },

@@ -1,0 +1,9 @@
+{
+"type": "FeatureCollection",
+"name": "tile_104_610",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "gml_id": "id38f68704-64b8-4d28-adb1-a7aeecccc5e6", "flomsoneID": "fs002_26", "lokalId": "5f33740f-5143-47f8-bf18-a8139acb7d13", "navnerom": "https://data.geonorge.no/sosi/samfunnssikkerhet/flomsoner", "versjonId": 1.1, "datauttaksdato": "2025-04-22T09:12:34", "opphav": "NVE", "statusDato": "2023-01-06T00:00:00", "statusKartlegging": 1, "førsteDigitaliseringsdato": "2022/05/24", "målemetode": 61.0, "nøyaktighet": 0.0, "lavpunkt": 1.0, "gjentaksintervall": 200, "symbolFlom": 2.0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 10.465627306821744, 61.097357260803584 ], [ 10.465572485717614, 61.097192674624281 ], [ 10.465443934866224, 61.097100899924833 ], [ 10.465479139529652, 61.097177852047103 ], [ 10.465627306821744, 61.097357260803584 ] ] ] } },
+{ "type": "Feature", "properties": { "gml_id": "id8cf19f2b-885c-449b-aecc-f76d3a9b4325", "flomsoneID": "fs002_26", "lokalId": "ed9367a3-587b-4666-86d2-fb0039d68eda", "navnerom": "https://data.geonorge.no/sosi/samfunnssikkerhet/flomsoner", "versjonId": 1.1, "datauttaksdato": "2025-04-22T09:12:34", "opphav": "NVE", "statusDato": "2023-01-06T00:00:00", "statusKartlegging": 1, "førsteDigitaliseringsdato": "2022/05/24", "målemetode": 61.0, "nøyaktighet": 0.0, "lavpunkt": 1.0, "gjentaksintervall": 200, "symbolFlom": 2.0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 10.46497347778223, 61.094881189231877 ], [ 10.464841439044619, 61.094993850530592 ], [ 10.464983261538189, 61.095263898721107 ], [ 10.465014153871548, 61.095220402069458 ], [ 10.46497347778223, 61.094881189231877 ] ] ] } }
+]
+}

@@ -63,3 +63,7 @@ C:/Users/jesp0/RiderProjects/GIS_Prosjekt/GIS_Prosjekt/bin/Debug/net8.0/wwwroot/
 /Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/obj/Debug/net8.0/GIS_Prosjekt.pdb
 /Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/obj/Debug/net8.0/GIS_Prosjekt.genruntimeconfig.cache
 /Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/obj/Debug/net8.0/ref/GIS_Prosjekt.dll
+/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/obj/Debug/net8.0/GIS_Prosjekt.sourcelink.json
+/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/bin/Debug/net8.0/Newtonsoft.Json.dll
+/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/obj/Debug/net8.0/GIS_Prosjekt.csproj.AssemblyReference.cache
+/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/obj/Debug/net8.0/GIS_Pros.EEC4379E.Up2Date

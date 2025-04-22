@@ -3,14 +3,14 @@
     <StaticWebAssetEndpoint Include="_content/GIS_Prosjekt/css/site.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\site.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-rKoEmuIN5WieOKd\u002BGIxi63eKEqqezreed5ynVh4/rDg="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"410"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022rKoEmuIN5WieOKd\u002BGIxi63eKEqqezreed5ynVh4/rDg=\u0022"},{"Name":"Last-Modified","Value":"Fri, 04 Apr 2025 13:37:01 GMT"}]]]></ResponseHeaders>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-TXmN\u002BInSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"779"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022TXmN\u002BInSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk=\u0022"},{"Name":"Last-Modified","Value":"Tue, 22 Apr 2025 11:44:06 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
-    <StaticWebAssetEndpoint Include="_content/GIS_Prosjekt/css/site.sifrukmf5v.css">
+    <StaticWebAssetEndpoint Include="_content/GIS_Prosjekt/css/site.ftdbgbtiee.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\site.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"sifrukmf5v"},{"Name":"integrity","Value":"sha256-rKoEmuIN5WieOKd\u002BGIxi63eKEqqezreed5ynVh4/rDg="},{"Name":"label","Value":"_content/GIS_Prosjekt/css/site.css"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"410"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022rKoEmuIN5WieOKd\u002BGIxi63eKEqqezreed5ynVh4/rDg=\u0022"},{"Name":"Last-Modified","Value":"Fri, 04 Apr 2025 13:37:01 GMT"}]]]></ResponseHeaders>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"ftdbgbtiee"},{"Name":"integrity","Value":"sha256-TXmN\u002BInSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk="},{"Name":"label","Value":"_content/GIS_Prosjekt/css/site.css"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"779"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022TXmN\u002BInSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk=\u0022"},{"Name":"Last-Modified","Value":"Tue, 22 Apr 2025 11:44:06 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/GIS_Prosjekt/favicon.61n19gt1b8.ico">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\favicon.ico'))</AssetFile>
@@ -47,6 +47,18 @@
       <Selectors><![CDATA[[]]]></Selectors>
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-uHP\u002Bu2uXHHNvcHFdx/DpdMzAdbjN0BKMptCvR/KXMRQ="}]]]></EndpointProperties>
       <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"1081"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022uHP\u002Bu2uXHHNvcHFdx/DpdMzAdbjN0BKMptCvR/KXMRQ=\u0022"},{"Name":"Last-Modified","Value":"Tue, 08 Apr 2025 10:26:58 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/GIS_Prosjekt/js/map.js">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\map.js'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-fv1oMbAWLfl3B/UBTjrW9BcrHi\u002B7B5ltsonJ6w/yeYU="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"1336"},{"Name":"Content-Type","Value":"text/javascript"},{"Name":"ETag","Value":"\u0022fv1oMbAWLfl3B/UBTjrW9BcrHi\u002B7B5ltsonJ6w/yeYU=\u0022"},{"Name":"Last-Modified","Value":"Tue, 22 Apr 2025 19:44:04 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/GIS_Prosjekt/js/map.u8ovxcg8u9.js">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\map.js'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"u8ovxcg8u9"},{"Name":"integrity","Value":"sha256-fv1oMbAWLfl3B/UBTjrW9BcrHi\u002B7B5ltsonJ6w/yeYU="},{"Name":"label","Value":"_content/GIS_Prosjekt/js/map.js"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"1336"},{"Name":"Content-Type","Value":"text/javascript"},{"Name":"ETag","Value":"\u0022fv1oMbAWLfl3B/UBTjrW9BcrHi\u002B7B5ltsonJ6w/yeYU=\u0022"},{"Name":"Last-Modified","Value":"Tue, 22 Apr 2025 19:44:04 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/GIS_Prosjekt/js/site.js">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\site.js'))</AssetFile>

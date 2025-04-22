@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GIS_Prosjekt")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4090b015668d8b592379c46e78268cc3085b6a2f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a03c95cfae679fb05b4bd4052722b294630411ad")]
 [assembly: System.Reflection.AssemblyProductAttribute("GIS_Prosjekt")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GIS_Prosjekt")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

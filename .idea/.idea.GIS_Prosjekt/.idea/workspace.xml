@@ -10,7 +10,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d4fbc16e-e49c-4463-9793-266c5f14400d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Controllers/MapController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GIS_Prosjekt/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GIS_Prosjekt/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -112,7 +111,7 @@
       <workItem from="1744106974693" duration="71000" />
       <workItem from="1744107303739" duration="368000" />
       <workItem from="1744107684866" duration="535000" />
-      <workItem from="1744108234334" duration="7485000" />
+      <workItem from="1744108234334" duration="17709000" />
     </task>
     <servers />
   </component>

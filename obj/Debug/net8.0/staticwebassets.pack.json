@@ -17,6 +17,10 @@
       "PackagePath": "staticwebassets/geodata/skredfaresone.geojson"
     },
     {
+      "Id": "/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/wwwroot/js/map.js",
+      "PackagePath": "staticwebassets/js/map.js"
+    },
+    {
       "Id": "/Users/jesperheidenberghansen/Documents/GIT/GIS_Prosjekt/wwwroot/js/site.js",
       "PackagePath": "staticwebassets/js/site.js"
     },

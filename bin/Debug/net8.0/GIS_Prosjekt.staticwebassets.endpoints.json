@@ -99,7 +99,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "410"
+          "Value": "779"
         },
         {
           "Name": "Content-Type",
@@ -107,22 +107,22 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"rKoEmuIN5WieOKd+GIxi63eKEqqezreed5ynVh4/rDg=\""
+          "Value": "\"TXmN+InSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 04 Apr 2025 13:37:01 GMT"
+          "Value": "Tue, 22 Apr 2025 11:44:06 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-rKoEmuIN5WieOKd+GIxi63eKEqqezreed5ynVh4/rDg="
+          "Value": "sha256-TXmN+InSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk="
         }
       ]
     },
     {
-      "Route": "css/site.sifrukmf5v.css",
+      "Route": "css/site.ftdbgbtiee.css",
       "AssetFile": "css/site.css",
       "Selectors": [],
       "ResponseHeaders": [
@@ -136,7 +136,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "410"
+          "Value": "779"
         },
         {
           "Name": "Content-Type",
@@ -144,21 +144,21 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"rKoEmuIN5WieOKd+GIxi63eKEqqezreed5ynVh4/rDg=\""
+          "Value": "\"TXmN+InSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 04 Apr 2025 13:37:01 GMT"
+          "Value": "Tue, 22 Apr 2025 11:44:06 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "sifrukmf5v"
+          "Value": "ftdbgbtiee"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-rKoEmuIN5WieOKd+GIxi63eKEqqezreed5ynVh4/rDg="
+          "Value": "sha256-TXmN+InSqGDbtYmD4vRzaHxs0SlEWPeokEBGw6s7Qxk="
         },
         {
           "Name": "label",
@@ -327,6 +327,88 @@
         {
           "Name": "label",
           "Value": "geodata/skredfaresone.geojson"
+        }
+      ]
+    },
+    {
+      "Route": "js/map.js",
+      "AssetFile": "js/map.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1336"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"fv1oMbAWLfl3B/UBTjrW9BcrHi+7B5ltsonJ6w/yeYU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 22 Apr 2025 19:44:04 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-fv1oMbAWLfl3B/UBTjrW9BcrHi+7B5ltsonJ6w/yeYU="
+        }
+      ]
+    },
+    {
+      "Route": "js/map.u8ovxcg8u9.js",
+      "AssetFile": "js/map.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1336"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"fv1oMbAWLfl3B/UBTjrW9BcrHi+7B5ltsonJ6w/yeYU=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 22 Apr 2025 19:44:04 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "u8ovxcg8u9"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-fv1oMbAWLfl3B/UBTjrW9BcrHi+7B5ltsonJ6w/yeYU="
+        },
+        {
+          "Name": "label",
+          "Value": "js/map.js"
         }
       ]
     },
