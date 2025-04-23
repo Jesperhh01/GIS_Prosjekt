@@ -1,0 +1,18 @@
+# Byggmapper
+bin/
+obj/
+
+# Rider/IDEA
+.idea/
+*.iml
+
+# Brukerspesifikke filer
+*.user
+*.suo
+
+# Debug
+*.pdb
+*.cache
+
+# Mac
+.DS_Store

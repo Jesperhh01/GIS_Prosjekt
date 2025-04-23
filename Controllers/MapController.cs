@@ -15,58 +15,19 @@ public class MapController : ControllerBase
         return Ok("Test successful");
     }
     
-    [HttpGet("flomtiles")]
-    public IActionResult Flomtiles([FromQuery] string bbox)
+    [HttpGet("flomtiles/{tileId}")]
+    public IActionResult GetTile(string tileId)
     {
-        if (string.IsNullOrWhiteSpace(bbox))
-            return BadRequest("Du må sende inn bbox som parameter");
-        
-        var parts = bbox.Split(',');
-        
-        if (!double.TryParse(parts[0], NumberStyles.Any, CultureInfo.InvariantCulture, out double minLon) ||
-            !double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double minLat) ||
-            !double.TryParse(parts[2], NumberStyles.Any, CultureInfo.InvariantCulture, out double maxLon) ||
-            !double.TryParse(parts[3], NumberStyles.Any, CultureInfo.InvariantCulture, out double maxLat))
+        string filePath = Path.Combine("tiles", $"{tileId}.geojson");
+
+        if (!System.IO.File.Exists(filePath))
         {
-            return BadRequest("Ugyldig bbox format");
+            return NotFound(new { error = "Tile not found" });        
         }
+
+        string json = System.IO.File.ReadAllText(filePath);
         
-        double tileSize = 0.1;
-
-        int minX = (int)Math.Floor(minLon / tileSize);
-        int maxX = (int)Math.Floor(maxLon / tileSize);
-        int minY = (int)Math.Floor(minLat / tileSize);
-        int maxY = (int)Math.Floor(maxLat / tileSize);
-        
-        var allFeatures = new List<string>();
-
-        for (int x = minX; x <= maxX; x++)
-        {
-            for (int y = minY; y <= maxY; y++)
-            {
-                string tileName = $"tile_{x}_{y}.geojson";
-                string filePath = Path.Combine("tiles", tileName);
-
-                if (System.IO.File.Exists(filePath))
-                {
-                    var json = System.IO.File.ReadAllText(filePath);
-                    var content = JObject.Parse(json);
-                    var features = content["features"];
-
-                    if (features != null)
-                    {
-                        foreach (var feature in features)
-                        {
-                            allFeatures.Add(feature.ToString(Newtonsoft.Json.Formatting.None));
-                        }
-                    }
-                }
-                
-
-            }
-        }
-        var geojson = $"{{\"type\": \"FeatureCollection\", \"features\": [{string.Join(",", allFeatures)}]}}";
-        return Content(geojson, "application/json");
+        return Content(json, "application/json");
     }
     
     
