@@ -8,6 +8,14 @@ document.addEventListener('DOMContentLoaded', function () {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
     
+    let featureIndex = []
+    fetch('/feature_index.json')
+        .then(res => res.json())
+        .then(data => {
+            featureIndex = data;
+            loadFlomtiles(); // start når index er klar
+        });
+    
     // Beholder for flomdata
     const flomLayer = L.geoJSON(null, {
         style: {
@@ -18,19 +26,29 @@ document.addEventListener('DOMContentLoaded', function () {
     }).addTo(map);
 
     // Regner ut synlige flomdata basert på kartutsnitt
-    function getVisibleTileIds(bounds, tileSize = 0.1) {
-        const minX = Math.floor(bounds.getWest() / tileSize);
-        const maxX = Math.floor(bounds.getEast() / tileSize);
-        const minY = Math.floor(bounds.getSouth() / tileSize);
-        const maxY = Math.floor(bounds.getNorth() / tileSize);
+    function getVisibleLokalIds(bounds) {
+        const visibleIds = [];
 
-        const tileIds = [];
-        for (let x = minX; x <= maxX; x++) {
-            for (let y = minY; y <= maxY; y++) {
-                tileIds.push(`tile_${x}_${y}`);
+        const minLon = bounds.getWest();
+        const minLat = bounds.getSouth();
+        const maxLon = bounds.getEast();
+        const maxLat = bounds.getNorth();
+
+        featureIndex.forEach(entry => {
+            const [entryMinLon, entryMinLat, entryMaxLon, entryMaxLat] = entry.bbox;
+
+            const overlap =
+                entryMaxLon >= minLon &&
+                entryMinLon <= maxLon &&
+                entryMaxLat >= minLat &&
+                entryMinLat <= maxLat;
+
+            if (overlap) {
+                visibleIds.push(entry.lokalId);
             }
-        }
-        return tileIds;
+        });
+
+        return visibleIds;
     }
     
     // Minne-Cache for allerede hentet tiles
@@ -52,23 +70,51 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function loadFlomtiles() {
         const bounds = map.getBounds();
-        const tileIds = getVisibleTileIds(bounds);
+        const bbox = [
+            bounds.getWest(),
+            bounds.getSouth(),
+            bounds.getEast(),
+            bounds.getNorth()
+        ];
 
-        flomLayer.clearLayers();
+        const visibleIds = getVisibleLokalIds(bounds);
+        const uncachedIds = visibleIds.filter(id => !tileCache.has(id));
 
-        tileIds.forEach(tileId => {
-            if (tileCache.has(tileId)) {
-                flomLayer.addData(tileCache.get(tileId));
-            } else {
-                fetch(`/api/map/flomtiles/${tileId}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        flomLayer.addData(data);
-                        addTileToCache(tileId, data); // bruker LRU-logikken vår
-                    })
-                    .catch(err => {
-                        console.warn(`Tile ${tileId} feilet:`, err);
-                    });
+        // Hvis alt allerede er i cache
+        if (uncachedIds.length === 0) {
+            visibleIds.forEach(id => {
+                flomLayer.addData(tileCache.get(id));
+            });
+            return;
+        }
+
+        // Hent manglende features fra backend
+        fetch('/api/map/features', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                lokalIds: uncachedIds,
+                bbox: bbox
+            })
+        })
+            .then(res => res.json())
+            .then(featureCollection => {
+                featureCollection.features.forEach(feature => {
+                    const lokalId = feature.properties.lokalId;
+                    flomLayer.addData(feature);
+                    addTileToCache(lokalId, feature);
+                });
+            })
+            .catch(err => {
+                console.warn("Feil ved henting av features:", err);
+            });
+
+        // Legg til de som allerede er i cache
+        visibleIds.forEach(id => {
+            if (tileCache.has(id)) {
+                flomLayer.addData(tileCache.get(id));
             }
         });
     }
@@ -84,20 +130,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Kjør første gang
     loadFlomtiles();
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 });

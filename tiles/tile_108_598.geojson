@@ -1,8 +1,0 @@
-{
-"type": "FeatureCollection",
-"name": "tile_108_598",
-"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-"features": [
-{ "type": "Feature", "properties": { "gml_id": "id661d7848-e699-476f-b80d-e1656ea96160", "flomsoneID": "fs003_2", "lokalId": "d8f20172-3850-4e0e-bdd6-7ac602c3ecc1", "navnerom": "https://data.geonorge.no/sosi/samfunnssikkerhet/flomsoner", "versjonId": 1.1, "datauttaksdato": "2025-04-22T09:08:43", "opphav": "Multiconsult AS", "statusDato": "2022-08-03T00:00:00", "statusKartlegging": 1, "førsteDigitaliseringsdato": "2018/05/24", "målemetode": 61.0, "nøyaktighet": 100.0, "lavpunkt": 1.0, "gjentaksintervall": 20, "symbolFlom": 2.0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 10.884327981440956, 59.80075744403392 ], [ 10.883692269782758, 59.801885954908983 ], [ 10.882973108006604, 59.80249817493047 ], [ 10.884213231880604, 59.802523015427226 ], [ 10.885356543142059, 59.80033025812542 ], [ 10.884327981440956, 59.80075744403392 ] ], [ [ 10.884327981440956, 59.80075744403392 ], [ 10.884327747382704, 59.800753297238927 ], [ 10.884331643311096, 59.800755099739597 ], [ 10.884327981440956, 59.80075744403392 ] ] ] } }
-]
-}
