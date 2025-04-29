@@ -42,4 +42,10 @@ body {
   text-decoration: none;
   display: inline-block;
   border-radius: 0.125rem; /* Border radius in rem */
+
+}
+
+.btn:hover {
+  background-color: #005f73; 
+  cursor: pointer; 
 }
