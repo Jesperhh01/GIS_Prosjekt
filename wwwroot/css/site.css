@@ -28,7 +28,6 @@ body {
 }
 
 
-
 .centered-container {
   position: absolute;
   top: 45%;
@@ -40,7 +39,6 @@ body {
   padding: 20px;
   border-radius: 10px;
 }
-
 
 #map {
   width: 100%;
@@ -57,7 +55,7 @@ body {
   text-decoration: none;
   display: inline-block;
   border-radius: 0.125rem; /* Border radius in rem */
-
+  box-shadow: 5px 5px 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 .btn:hover {
@@ -76,3 +74,66 @@ body {
   filter: blur(4px);
   z-index: -1;
 }
+
+
+/*Personvern*/
+.centered-container-personvern {
+  position: absolute;
+  top: 45%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+
+  background-color: rgba(255, 255, 255, 0.85);  
+  padding: 40px 30px;
+  border-radius: 12px;
+  max-width: 450px;
+  box-shadow: 12px 12px 2px 1px rgba(0, 0, 0, 0.1);
+}
+
+.adrian {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("/css/CoolNewPics/Adrian.jpg");
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
+
+.centered-container-personvern2 {
+  position: absolute;
+  top: 45%;
+  left: 70%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+
+  background-color: rgba(255, 255, 255, 0.85);  
+  padding: 40px 30px;
+  border-radius: 12px;
+  max-width: 700px;
+  box-shadow: 12px 12px 2px 1px rgba(0, 0, 0, 0.1);
+}
+
+.main{
+  font-size: 2.2em;
+  margin-bottom: 1.5em;
+}
+
+.sub{
+  font-size: 1.4em;
+  margin-top: 1.5em;
+  margin-bottom: 0.8em;
+}
+
+.ulPersonvern {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  text-align: left;
+  margin: 0 auto 1em auto;
+  max-width: 90%;
+  line-height: 1.8;
+}
+/*Personvern End*/
