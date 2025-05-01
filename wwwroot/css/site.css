@@ -1,9 +1,16 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
+    min-height: 100%;
 }
 
 .margin-top {
   margin-top: 3rem;
+}
+
+.navbar {
+    z-index: 10;
 }
 
 
@@ -16,11 +23,6 @@ html {
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
 }
 
 body {
@@ -46,22 +48,33 @@ body {
 }
 
 #map {
-  flex: 1;
-  height: 100%;
+    position: fixed;
+    top: 55px; 
+    left: 250px; 
+    right: 0;
+    bottom: 55px; 
+    z-index: 0;
 }
 
 #sidebar {
-  width: 250px;
-  background-color: #F0F8FF;
-  padding: 1rem;
-  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-  font-family: sans-serif;
+    position: fixed;
+    top: 55px; 
+    left: 0;
+    bottom: 55px;
+    width: 250px;
+    background-color: #F0F8FF;
+    padding: 1rem;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3); /*COOL SHADOWS :O*/
+    overflow-y: auto;
+    z-index: 1;
 }
 
-#sidebar label {
-  display: block;
-  margin-bottom: 5px;
-}
+    #sidebar label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
 
 
 .btn {
