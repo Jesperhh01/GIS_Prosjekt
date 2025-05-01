@@ -43,3 +43,7 @@ button.accept-policy {
   line-height: 60px;
   background-color: rgb(255, 255, 255); 
 }
+
+.container {
+  margin-left: unset;
+}
