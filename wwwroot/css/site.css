@@ -13,7 +13,10 @@ html {
     z-index: 10;
 }
 
-
+footer {
+    position: relative;
+    z-index: 9;
+}
 
 @media (min-width: 768px) {
   html {
@@ -42,27 +45,23 @@ body {
   border-radius: 10px;
 }
 
-#map-container {
-  display: flex;
-  height: 1000px;
-}
 
 #map {
     position: fixed;
     top: 55px; 
     left: 250px; 
     right: 0;
-    bottom: 55px; 
+    bottom: 60px; 
     z-index: 0;
 }
 
 #sidebar {
     position: fixed;
-    top: 55px; 
+    top: 55px;
     left: 0;
     bottom: 55px;
     width: 250px;
-    background-color: #F0F8FF;
+    background-color: #FFFFFF;
     padding: 1rem;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3); /*COOL SHADOWS :O*/
     overflow-y: auto;
