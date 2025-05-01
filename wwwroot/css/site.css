@@ -40,10 +40,29 @@ body {
   border-radius: 10px;
 }
 
-#map {
-  width: 100%;
+#map-container {
+  display: flex;
   height: 1000px;
 }
+
+#map {
+  flex: 1;
+  height: 100%;
+}
+
+#sidebar {
+  width: 250px;
+  background-color: #F0F8FF;
+  padding: 1rem;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  font-family: sans-serif;
+}
+
+#sidebar label {
+  display: block;
+  margin-bottom: 5px;
+}
+
 
 .btn {
   background-color: #008CBA; /* Blue */

@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fillOpacity: 0.3       // Gjennomsiktighet på innsiden
         }
     }).addTo(map);
+    
 
     // Regner ut synlige flomdata basert på kartutsnitt
     function getVisibleLokalIds(bounds) {
@@ -76,6 +77,8 @@ document.addEventListener('DOMContentLoaded', function () {
             bounds.getEast(),
             bounds.getNorth()
         ];
+        
+        
 
         const visibleIds = getVisibleLokalIds(bounds);
         const uncachedIds = visibleIds.filter(id => !tileCache.has(id));
@@ -87,6 +90,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             return;
         }
+        
+        flomLayer.clearLayers();
 
         // Hent manglende features fra backend
         fetch('/api/map/features', {
@@ -126,6 +131,16 @@ document.addEventListener('DOMContentLoaded', function () {
         debounceTimer = setTimeout(() => {
             loadFlomtiles();
         }, 500); // venter 0.5 sek etter bevegelse
+    });
+
+    // Håndter synlighet via checkboxene
+    document.getElementById('toggleFlom').addEventListener('change', function() {
+        if (this.checked) {
+            map.addLayer(flomLayer);
+            loadFlomtiles();  // Last inn flomdata hvis aktivert
+        } else {
+            map.removeLayer(flomLayer);
+        }
     });
 
 // Kjør første gang
