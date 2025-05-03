@@ -23,14 +23,20 @@ footer {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
 body {
   margin-bottom: 60px;   
+  opacity: 1;
+  transition: opacity 0.5s ease-in;
 }
 
+body.fade-out {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+
+body.fade-in {
+  opacity: 1;
+}
 
 .centered-container {
   position: absolute;
@@ -86,10 +92,25 @@ body {
   display: inline-block;
   border-radius: 0.125rem; /* Border radius in rem */
   box-shadow: 5px 5px 1px 1px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .btn:hover {
   background-color: #005f73; 
+  outline: none;
+}
+
+.btn:active {
+  background-color: #005161; 
+  transform: scale(0.95);
+  box-shadow: 5px 5px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.btn:focus,
+.btn:focus-visible,
+.btn:focus-within {
+  outline: none;
+  box-shadow: none;
 }
 
 .blurred-bakgrunn {
