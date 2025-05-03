@@ -23,22 +23,20 @@ footer {
   }
 }
 
-body {
-  margin-bottom: 60px;
-}
-
-
 #main-content {
   opacity: 0;
-  transition: opacity 0.18s cubic-bezier(0.33, 1, 0.68, 1);
-  will-change: opacity;
+  transition: opacity 0.2s ease-in-out; 
+  will-change: opacity; 
 }
+
 #main-content.fade-in {
   opacity: 1;
 }
+
 #main-content.fade-out {
   opacity: 0;
 }
+
 
 .centered-container {
   position: absolute;
