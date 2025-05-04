@@ -1,5 +1,4 @@
-document.addEventListener('DOMContentLoaded', async function () {
-    
+document.addEventListener('DOMContentLoaded', function () {
     // Initialiser kart og sett koordinater og zoom-nivå
     const map = L.map('map').setView([59.91, 10.75], 10); // Oslo
 
@@ -7,15 +6,32 @@ document.addEventListener('DOMContentLoaded', async function () {
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-    
-    let featureIndex = []
+
+    let featureIndex = [];
+    let spatialTree = new RBush();
+
+// Etter at du har hentet feature_index.json
     fetch('/feature_index.json')
         .then(res => res.json())
         .then(data => {
             featureIndex = data;
-            loadFlomtiles(); // start når index er klar
+
+            // Gjør hver entry klar for spatial søk
+            const entries = featureIndex.map(e => ({
+                minX: e.bbox[0],
+                minY: e.bbox[1],
+                maxX: e.bbox[2],
+                maxY: e.bbox[3],
+                lokalId: e.lokalId
+            }));
+
+            // Bygg spatial indeks
+            spatialTree.load(entries);
+
+            // Nå kan du bruke spatialTree til å hente synlige IDs
+            loadFlomtiles(); // start
         });
-    
+
     // Beholder for flomdata
     const flomLayer = L.geoJSON(null, {
         style: {
@@ -25,114 +41,89 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }).addTo(map);
 
+
     // Regner ut synlige flomdata basert på kartutsnitt
     function getVisibleLokalIds(bounds) {
-        const visibleIds = [];
-
-        const minLon = bounds.getWest();
-        const minLat = bounds.getSouth();
-        const maxLon = bounds.getEast();
-        const maxLat = bounds.getNorth();
-
-        featureIndex.forEach(entry => {
-            const [entryMinLon, entryMinLat, entryMaxLon, entryMaxLat] = entry.bbox;
-
-            const overlap =
-                entryMaxLon >= minLon &&
-                entryMinLon <= maxLon &&
-                entryMaxLat >= minLat &&
-                entryMinLat <= maxLat;
-
-            if (overlap) {
-                visibleIds.push(entry.lokalId);
-            }
+        const results = spatialTree.search({
+            minX: bounds.getWest(),
+            minY: bounds.getSouth(),
+            maxX: bounds.getEast(),
+            maxY: bounds.getNorth()
         });
 
-        return visibleIds;
+        return results.map(r => r.lokalId);
     }
-    
+
     // Minne-Cache for allerede hentet tiles
     const tileCache = new Map();
-    const MAX_CACHE_SIZE = 10; // Maks antall tiles i cache
     
-    // funksjon for å legge til tiles i cache
-    function addTileToCache(tileId, data) {
-        if (tileCache.has(tileId)) {
-            tileCache.delete(tileId); // Fjern eksisterende tile for å oppdatere
-        }
-        tileCache.set(tileId, data);
-        
-        if (tileCache.size > MAX_CACHE_SIZE) {
-            const oldestTile = tileCache.keys().next().value;
-            tileCache.delete(oldestTile); // Fjern eldste tile
-        }
-    }
-
-    async function loadFlomtiles() {
+    const activeTiles = new Map();
+    function loadFlomtiles() {
         const bounds = map.getBounds();
-        const bbox = [
-            bounds.getWest(),
-            bounds.getSouth(),
-            bounds.getEast(),
-            bounds.getNorth()
-        ];
-        
-        const visibleIds = getVisibleLokalIds(bounds);
-        const uncachedIds = visibleIds.filter(id => !tileCache.has(id));
+        const visibleIds = new Set(getVisibleLokalIds(bounds));
 
-        // Hvis alt allerede er i cache
-        if (uncachedIds.length === 0) {
-            // Remove features not currently visible
-            flomLayer.eachLayer(layer => {
-                const id = layer.feature?.properties?.lokalId;
-                if (!visibleIds.includes(id)) {
-                    flomLayer.removeLayer(layer);
-                }
-            });
-
-            // Add any missing visible features
-            visibleIds.forEach(id => {
-                if (!flomLayer.getLayers().some(layer => layer.feature?.properties?.lokalId === id)) {
-                    flomLayer.addData(tileCache.get(id));
-                }
-            });
-
-            return;
+        for (let id of activeTiles.keys()) {
+            if (!visibleIds.has(id)) {
+                const layer = activeTiles.get(id);
+                flomLayer.removeLayer(layer);
+                activeTiles.delete(id);
+            }
         }
+        const toAdd = Array.from(visibleIds).filter(id => !activeTiles.has(id));
+        const fromCache = toAdd.filter(id => tileCache.has(id));
+        const toFetch = toAdd.filter(id => !tileCache.has(id));
 
-        // Legg til de som allerede er i cache
-        // visibleIds.forEach(id => {
-        //     if (tileCache.has(id)) {
-        //         flomLayer.addData(tileCache.get(id));
-        //     }
-        // });
+        fromCache.forEach(id => {
+            const feature = tileCache.get(id); // GeoJSON-data
+            const layer = L.geoJSON(feature, {
+                style: {
+                    color: '#0077ff',
+                    weight: 2,
+                    fillOpacity: 0.3
+                }
 
-        // Hent manglende features fra backend
-        const res = await fetch('/api/map/features', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                lokalIds: uncachedIds,
-                bbox: bbox
-            })
+            }).addTo(flomLayer); // Tegner i kartet
+            activeTiles.set(id, layer); // Husk at vi har tegnet denne
         });
         
-        const featureCollection = await res.json();
-        await Promise.all(
-            featureCollection.features.map(async feature => {
-                const lokalId = feature.properties.lokalId;
-                // if (tileCache.has(lokalId)) return;
-                if (flomLayer.getLayers().some(layer => layer.feature?.properties?.lokalId === lokalId)) return;
-                flomLayer.addData(feature);
-                await addTileToCache(lokalId, feature);
+        if (toFetch.length > 0) {
+            console.log("toFetch:", toFetch);
+            fetch('/api/map/features', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+        }
+                            }
+
+                    });
+                })
+                    console.warn("Feil ved henting av features:", err);
+                .catch(err => {
+                });
+                        activeTiles.set(id, layer); // registrer at den er tegnet
+                        }).addTo(flomLayer); // legg i kartet
+                                fillOpacity: 0.3
+                                weight: 2,
+                                color: '#0077ff',
+                            style: {
+                        const layer = L.geoJSON(feature, {
+
+                        tileCache.set(id, feature); // lagre i cache
+                body: JSON.stringify({
+                    lokalIds: toFetch
+                })
             })
-        );
+                .then(res => res.json()) // Tolker svaret som JSON
+                .then(featureCollection => {
+                    // Nå har vi GeoJSON-featureCollection
+                    // For hver feature:
+                    featureCollection.features.forEach(feature => {
+                        const id = feature.properties.lokalId;
+
     }
 
     let debounceTimer;
-
     map.on('moveend', () => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
@@ -141,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     // Håndter synlighet via checkboxene
-    document.getElementById('toggleFlom').addEventListener('change', function() {
+    document.getElementById('toggleFlom').addEventListener('change', function () {
         if (this.checked) {
             map.addLayer(flomLayer);
             loadFlomtiles();  // Last inn flomdata hvis aktivert
