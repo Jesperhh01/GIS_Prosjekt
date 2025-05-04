@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     // Initialiser kart og sett koordinater og zoom-nivå
     const map = L.map('map').setView([59.91, 10.75], 10); // Oslo
 
@@ -56,9 +56,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Minne-Cache for allerede hentet tiles
     const tileCache = new Map();
-    
+
     const activeTiles = new Map();
-    function loadFlomtiles() {
+
+    async function loadFlomtiles() {
         const bounds = map.getBounds();
         const visibleIds = new Set(getVisibleLokalIds(bounds));
 
@@ -85,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }).addTo(flomLayer); // Tegner i kartet
             activeTiles.set(id, layer); // Husk at vi har tegnet denne
         });
-        
+
         if (toFetch.length > 0) {
             console.log("toFetch:", toFetch);
             fetch('/api/map/features', {
@@ -93,23 +94,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-        }
-                            }
-
-                    });
-                })
-                    console.warn("Feil ved henting av features:", err);
-                .catch(err => {
-                });
-                        activeTiles.set(id, layer); // registrer at den er tegnet
-                        }).addTo(flomLayer); // legg i kartet
-                                fillOpacity: 0.3
-                                weight: 2,
-                                color: '#0077ff',
-                            style: {
-                        const layer = L.geoJSON(feature, {
-
-                        tileCache.set(id, feature); // lagre i cache
                 body: JSON.stringify({
                     lokalIds: toFetch
                 })
@@ -121,6 +105,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     featureCollection.features.forEach(feature => {
                         const id = feature.properties.lokalId;
 
+                        tileCache.set(id, feature); // lagre i cache
+
+                        const layer = L.geoJSON(feature, {
+                            style: {
+                                color: '#0077ff',
+                                weight: 2,
+                                fillOpacity: 0.3
+                            }
+                        }).addTo(flomLayer); // legg i kartet
+
+                        activeTiles.set(id, layer); // registrer at den er tegnet
+                    });
+                })
+                .catch(err => {
+                    console.warn("Feil ved henting av features:", err);
+                });
+        }
     }
 
     let debounceTimer;
