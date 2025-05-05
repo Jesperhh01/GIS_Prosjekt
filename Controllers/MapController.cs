@@ -13,66 +13,43 @@ using System.Text.Json;
 [Route("api/[controller]")]
 public class MapController : ControllerBase
 {
-    [HttpGet("test")]
-    public IActionResult Test()
-    {
-        return Ok("Test successful");
-    }
-    
     [HttpPost("features")]
     public IActionResult GetFeatures([FromBody] FlomFeatureRequest request) 
     {
+        if (request?.LokalIds == null || request.LokalIds.Count == 0)
+            return BadRequest(new { error = "Mangler lokalIds" });
+
         var connString = "Host=localhost;Port=5432;Username=postgres;Password=solsikke123;Database=geodata";
         using var conn = new NpgsqlConnection(connString);
         conn.Open();
-        
-        if (request == null || request.LokalIds == null || request.Bbox == null)
-        {
-            return BadRequest("Ugyldig data");
-        }
-        
-        double minLon = request.Bbox[0];
-        double minLat = request.Bbox[1];
-        double maxLon = request.Bbox[2];
-        double maxLat = request.Bbox[3];
-      
-        var envelopeWkt = string.Format(System.Globalization.CultureInfo.InvariantCulture,
-            "POLYGON(({0} {1}, {2} {1}, {2} {3}, {0} {3}, {0} {1}))",
-            minLon, minLat, maxLon, maxLat);
-        
+
+        // Kun hent basert på ID-er – all bounding skjer i klienten
         var sql = @"
-        SELECT lokalid, ST_AsGeoJSON(geom)
+        SELECT lokalid, ST_AsGeoJSON(geom) AS geojson
         FROM flomfeatures
-        WHERE lokalid = ANY (@ids)
-        AND geom && ST_GeomFromText(@bbox, 4326);
-         ";
+        WHERE lokalid = ANY(@ids);
+    ";
 
         using var cmd = new NpgsqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("ids", request.LokalIds);
-        cmd.Parameters.AddWithValue("bbox", envelopeWkt);
-
+        cmd.Parameters.Add(new NpgsqlParameter<string[]>("ids", request.LokalIds.ToArray()));
+        
+        var features = new List<object>();
         using var reader = cmd.ExecuteReader();
-        var result = new List<object>();
-
         while (reader.Read())
         {
             var lokalid = reader.GetString(0);
             var geojson = reader.GetString(1);
-            
-            var feature = new
-            {
-                type = "Feature",
+
+            features.Add(new {
+                type       = "Feature",
                 properties = new { lokalId = lokalid },
-                geometry = JsonSerializer.Deserialize<object>(geojson)            };
-            result.Add(feature);
+                geometry   = JsonSerializer.Deserialize<object>(geojson)
+            });
         }
+
         return Ok(new {
-            type = "FeatureCollection",
-            features = result
+            type     = "FeatureCollection",
+            features = features
         });
     }
-    
-    
-    
-    
 }
