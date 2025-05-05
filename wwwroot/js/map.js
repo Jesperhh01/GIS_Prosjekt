@@ -41,6 +41,35 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }).addTo(map);
 
+    // Beholder for veidata (IKKE legg til kartet ennå)
+    const veiLayer = L.geoJSON(null, {
+        style: {
+            color: '#ffb200',      // Farge på polygonkant
+            weight: 2,             // Tykkelse på kantlinje
+            fillOpacity: 0.3       // Gjennomsiktighet på innsiden
+        }
+    });
+
+// Last inn veilayer én gang fra fil
+    fetch('/geodata/veier_kristiansand.geojson')
+        .then(res => res.json())
+        .then(data => {
+            veiLayer.addData(data); // legg data inn i laget
+            // Ikke legg til kartet her – det gjøres kun når checkbox er aktivert
+        })
+        .catch(err => {
+            console.error('Kunne ikke laste veilayer:', err);
+        });
+
+// Toggle synlighet for veier
+    document.getElementById('toggleVeier').addEventListener('change', function () {
+        if (this.checked) {
+            map.addLayer(veiLayer);
+        } else {
+            map.removeLayer(veiLayer);
+        }
+    });
+
 
     // Regner ut synlige flomdata basert på kartutsnitt
     function getVisibleLokalIds(bounds) {
