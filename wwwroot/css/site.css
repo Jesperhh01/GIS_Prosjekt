@@ -130,16 +130,16 @@ footer {
 /*Personvern*/
 .centered-container-personvern {
   position: absolute;
-  top: 45%;
-  left: 30%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
 
-  background-color: rgba(255, 255, 255, 0.85);  
+  background-color: rgba(255, 255, 255, 0.9); /* Slightly more opaque for better readability */
   padding: 40px 30px;
   border-radius: 12px;
-  max-width: 450px;
-  box-shadow: 12px 12px 2px 1px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  box-shadow: 8px 8px 15px rgba(0, 0, 0, 0.2); /* Softer shadow for a modern look */
 }
 
 .adrian {
@@ -148,43 +148,44 @@ footer {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-image: url("/css/CoolNewPics/Adrian.jpg");
+  background-image: url("/css/CoolNewPics/natur.png");
   background-size: cover;
   background-position: center;
+  filter: blur(6px); 
   z-index: -1;
 }
 
-.centered-container-personvern2 {
-  position: absolute;
-  top: 45%;
-  left: 70%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-
-  background-color: rgba(255, 255, 255, 0.85);  
-  padding: 40px 30px;
-  border-radius: 12px;
-  max-width: 700px;
-  box-shadow: 12px 12px 2px 1px rgba(0, 0, 0, 0.1);
+.main {
+  font-size: 2.0em; 
+  margin-bottom: 1.2em;
+  font-weight: bold;
+  color: #333; 
 }
 
-.main{
-  font-size: 2.2em;
-  margin-bottom: 1.5em;
-}
-
-.sub{
-  font-size: 1.4em;
+.sub {
+  font-size: 1.2em; 
   margin-top: 1.5em;
-  margin-bottom: 0.8em;
+  margin-bottom: 1em;
+  font-weight: bold;
+  color: #555; 
 }
 
 .ulPersonvern {
   list-style-type: disc;
   padding-left: 1.5em;
   text-align: left;
-  margin: 0 auto 1em auto;
+  margin: 0 auto 1.5em auto;
   max-width: 90%;
   line-height: 1.8;
+  font-size: 0.9em;
+  color: #444; 
 }
-/*Personvern End*/
+
+.description {
+  font-size: 1.0em;
+  line-height: 1.8;
+  margin: 1em auto;
+  max-width: 90%;
+  text-align: justify;
+  color: #444; 
+}
