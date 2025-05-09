@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
             loadFlomtiles();
-        }, 10); // venter 0.5 sek etter bevegelse
+        }, 100); // venter 0.1 sek etter bevegelse
     });
 
     // Håndter synlighet via checkboxene
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
-// Kjør første gang
+    // Kjør første gang
     await loadFlomtiles();
 });
 
@@ -115,21 +115,42 @@ const layerStyle = {
     }
 }
 
+const ZOOM_LEVEL_THRESHOLDS = {
+    HIGH: 12,    // Full detail above this zoom level
+    MEDIUM: 8,   // Medium simplification
+    LOW: 5       // High simplification below this zoom level
+};
+
+const SIMPLIFICATION_TOLERANCES = {
+    HIGH: 0,      // No simplification
+    MEDIUM: 0.001, // Medium simplification
+    LOW: 0.005    // High simplification
+};
+
 async function loadFlomtiles() {
     const bounds = map.getBounds();
+    const currentZoom = map.getZoom();
     const visibleIds = new Set(getVisibleLokalIds(bounds));
 
-    for (let id of activeTiles.keys()) {
-        if (!visibleIds.has(id)) {
-            const layer = activeTiles.get(id);
-            flomLayer.removeLayer(layer);
-            activeTiles.delete(id);
-        }
+    layerStyle.weight = currentZoom >= ZOOM_LEVEL_THRESHOLDS.MEDIUM 
+        ? 2 
+        : 1;
+    layerStyle.fillOpacity = currentZoom >= ZOOM_LEVEL_THRESHOLDS.MEDIUM 
+        ? 0.3 
+        : 0.2;
+
+    const idsToRemove = [...activeTiles.keys()].filter(id => !visibleIds.has(id));
+    for (const id of idsToRemove) {
+        const layer = activeTiles.get(id);
+        flomLayer.removeLayer(layer);
+        activeTiles.delete(id);
     }
-    
-    const toAdd = Array.from(visibleIds).filter(id => !activeTiles.has(id));
-    const fromCache = toAdd.filter(id => tileCache.has(id));
-    const toFetch = toAdd.filter(id => !tileCache.has(id));
+
+    const toAdd = [...visibleIds].filter(id => !activeTiles.has(id));
+    const {fromCache, toFetch} = toAdd.reduce((acc, id) => {
+        tileCache.has(id) ? acc.fromCache.push(id) : acc.toFetch.push(id);
+        return acc;
+    }, { fromCache: [], toFetch: [] });
 
     if (toFetch.length > 0) {
         console.log("toFetch:", toFetch);
@@ -139,7 +160,8 @@ async function loadFlomtiles() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                lokalIds: toFetch
+                lokalIds: toFetch,
+                simplificationLevel: getSimplificationLevel(currentZoom)
             })
         });
         const featureCollection = await mapFeaturesRes.json();
@@ -154,6 +176,16 @@ async function loadFlomtiles() {
     
     else {
         void Promise.all(fromCache.map(addFeatureFromCache));
+    }
+}
+
+function getSimplificationLevel(zoom) {
+    if (zoom >= ZOOM_LEVEL_THRESHOLDS.HIGH) {
+        return SIMPLIFICATION_TOLERANCES.HIGH;
+    } else if (zoom >= ZOOM_LEVEL_THRESHOLDS.MEDIUM) {
+        return SIMPLIFICATION_TOLERANCES.MEDIUM;
+    } else {
+        return SIMPLIFICATION_TOLERANCES.LOW;
     }
 }
 
