@@ -1,11 +1,17 @@
 // Minne-Cache for allerede hentet tiles
 const tileCache = new Map();
-
 const activeTiles = new Map();
 
+let intersectionPoints = [];
+
+// Kart
 const map = L.map('map').setView([59.91, 10.75], 10); // Oslo
 
+// spatial tre
 const spatialTree = new RBush();
+
+const drawnItems = new L.FeatureGroup();
+map.addLayer(drawnItems);
 
 // Beholder for flomdata
 const flomLayer = L.geoJSON(null, {
@@ -25,6 +31,7 @@ const veiLayer = L.geoJSON(null, {
     }
 });
 
+// Funksjonen kjører når DOM-innhold er lastet.
 document.addEventListener('DOMContentLoaded', async function () {
     // Initialiser kart og sett koordinater og zoom-nivå
 
@@ -201,4 +208,112 @@ async function addFeatureFromServer(feature) {
     const layer = L.geoJSON(feature, layerStyle).addTo(flomLayer); // legg i kartet
     activeTiles.set(id, layer); // registrer at den er tegnet
 }
+
+// Lag draw kontroller, legg til i kartet
+map.addControl(new L.Control.Draw({
+    edit: {
+        featureGroup: drawnItems,
+        poly: {
+            allowIntersection: false
+        }
+    },
+    draw: {
+        polygon: {
+            allowIntersection: false,
+            showArea: true,
+            shapeOptions: {
+                color: '#ff6200',
+            }
+        },
+        circle: false,
+        circlemarker: false,
+        marker: false,
+        polyline: false,
+        rectangle: true
+    }
+}));
+
+// Funksjoner for å håndtere draw-eventer
+map.on('draw:created', async (e) => {
+    const layer = e.layer;
+    drawnItems.addLayer(layer);
+
+    // Sjekk om det er en flomzone på tegningen
+    intersectionPoints = [];
+    flomLayer.eachLayer(async (flomLayer) => checkIntersection(layer, flomLayer));
+    void createIntersectionMarkers();
+});
+
+// Rediger
+map.on('draw:edited', (e) => {
+    const layers = e.layers;
+    layers.eachLayer(async function(layer) {
+        checkIntersection(layer)
+        const geoJSON = layer.toGeoJSON();
+    });
+});
+
+// Slett
+map.on('draw:deleted', function(e) {
+    const layers = e.layers;
+    layers.eachLayer(function(layer) {
+        const geoJSON = layer.toGeoJSON();
+    });
+});
+
+const intersectionMarkers = L.featureGroup().addTo(map);
+
+async function checkIntersection(drawLayer, flomLayer) {
+    const [drawGeoJSON, flomGeoJSON] = [drawLayer.toGeoJSON(), flomLayer.toGeoJSON().features[0]];
+    const intersect = turf.intersect(drawGeoJSON, flomGeoJSON)
+    
+    if (intersect) {
+        const centroid = turf.centroid(intersect);
+        intersectionPoints.push({
+            point: centroid,
+            lokalId: flomGeoJSON.properties.lokalId,
+        });
+    }
+}
+
+async function createIntersectionMarkers() {
+    const filteredPoints = [];
+    const radius = 250;
+    // Ingen punkter, ingen intersections
+    if (intersectionPoints.length === 0) return;
+
+    // Filtrer ut punkter som er for nærme
+    await Promise.all(intersectionPoints.map(async item => {
+
+        const tooClose = filteredPoints.some(existing => {
+            const distance = turf.distance(
+                item.point,
+                existing.point,
+                { units: 'meters' }
+            );
+            return distance < radius;
+        });
+
+        if (!tooClose) {
+            filteredPoints.push(item);
+        }
+    }));
+
+    // Create markers for filtered points
+    filteredPoints.forEach(item => {
+        const marker = L
+            .marker([item.point.geometry.coordinates[1], item.point.geometry.coordinates[0]])
+            .setIcon(L.divIcon({
+                html: `<div style="font-size: 32px;">💧</div>`,
+                className: "",
+                iconSize: [64, 64],
+                iconAnchor: [32, 32],
+                popupAnchor: [-2, -20]
+            }))
+            .bindPopup("Markert område er i flomsone");
+        
+        intersectionMarkers.addLayer(marker);
+    });
+}
+
 
