@@ -2,8 +2,6 @@
 const tileCache = new Map();
 const activeTiles = new Map();
 
-let intersectionPoints = [];
-
 // Kart
 const map = L.map('map').setView([59.91, 10.75], 10); // Oslo
 
@@ -237,73 +235,98 @@ map.addControl(new L.Control.Draw({
 map.on('draw:created', async (e) => {
     const layer = e.layer;
     drawnItems.addLayer(layer);
-
-    // Sjekk om det er en flomzone på tegningen
-    intersectionPoints = [];
-    flomLayer.eachLayer(async (flomLayer) => checkIntersection(layer, flomLayer));
-    void createIntersectionMarkers();
+    void checkFlomLayer(layer);
 });
 
 // Rediger
 map.on('draw:edited', (e) => {
     const layers = e.layers;
     layers.eachLayer(async function(layer) {
-        checkIntersection(layer)
-        const geoJSON = layer.toGeoJSON();
+        void clearIntersections(layer);
+        void checkFlomLayer(layer);
     });
 });
 
 // Slett
 map.on('draw:deleted', function(e) {
     const layers = e.layers;
-    layers.eachLayer(function(layer) {
-        const geoJSON = layer.toGeoJSON();
-    });
+    layers.eachLayer(async (layer) => clearIntersections(layer));
 });
 
 const intersectionMarkers = L.featureGroup().addTo(map);
+// For å lagre markerte områder og tilhørende tegning ID
+const markerToDrawnLayerMap = new Map();
+
+// Sjekker om flomlag krysser markert område
+async function checkFlomLayer(layer) {
+    // Sjekk om det er en flomzone på tegningen
+    const intersectionPointsPromises = [];
+    flomLayer.eachLayer(async (flomLayer) => intersectionPointsPromises.push(checkIntersection(layer, flomLayer)));
+    // Pass på å gjøre alle promises til objekter
+    // Filtrer punkter som er for nærme
+    const filteredPoints = await filterIntersections(await Promise.all(intersectionPointsPromises));
+    // Marker resterende punkter
+    void markIntersections(filteredPoints, layer._leaflet_id);
+}
+
+async function clearIntersections(layer) {
+    // Hent relevante markører
+    const markersToRemove = [];
+    markerToDrawnLayerMap.forEach((drawnLayerId, markerId) => {
+        if (drawnLayerId === layer._leaflet_id) {
+            markersToRemove.push(markerId);
+        }
+    });
+
+    // Til slutt fjern markører
+    markersToRemove.forEach(markerId => {
+        const marker = intersectionMarkers.getLayer(markerId);
+        if (marker) {
+            intersectionMarkers.removeLayer(marker);
+            markerToDrawnLayerMap.delete(markerId);
+        }
+    });
+}
 
 async function checkIntersection(drawLayer, flomLayer) {
     const [drawGeoJSON, flomGeoJSON] = [drawLayer.toGeoJSON(), flomLayer.toGeoJSON().features[0]];
+    // Krysser områdene?
     const intersect = turf.intersect(drawGeoJSON, flomGeoJSON)
-    
+
     if (intersect) {
+        // Hent senter punkt
         const centroid = turf.centroid(intersect);
-        intersectionPoints.push({
+        return {
             point: centroid,
             lokalId: flomGeoJSON.properties.lokalId,
-        });
+        };
     }
 }
 
-async function createIntersectionMarkers() {
-    const filteredPoints = [];
-    const radius = 250;
+async function filterIntersections(intersectionPoints) {
+    // Filtrer nullverdier 
+    intersectionPoints = intersectionPoints.filter(Boolean);
+
     // Ingen punkter, ingen intersections
-    if (intersectionPoints.length === 0) return;
+    if (intersectionPoints.length === 0) return [];
 
-    // Filtrer ut punkter som er for nærme
-    await Promise.all(intersectionPoints.map(async item => {
+    const MINIMUM_POINT_DISTANCE = 250; // meters
 
-        const tooClose = filteredPoints.some(existing => {
-            const distance = turf.distance(
-                item.point,
-                existing.point,
-                { units: 'meters' }
-            );
-            return distance < radius;
-        });
+    return intersectionPoints.filter((point, index) => {
+        // Sjekk om dette punktet er for nært noen av de tidligere punktene
+        return !intersectionPoints.slice(0, index).some(prevPoint =>
+            turf.distance(point.point, prevPoint.point, {units: 'meters'}) < MINIMUM_POINT_DISTANCE
+        );
+    });
+}
 
-        if (!tooClose) {
-            filteredPoints.push(item);
-        }
-    }));
-
-    // Create markers for filtered points
-    filteredPoints.forEach(item => {
+async function markIntersections(filteredPoints, drawnLayerId) {
+    // Marker resterende punkter
+    for (const item of filteredPoints) {
         const marker = L
             .marker([item.point.geometry.coordinates[1], item.point.geometry.coordinates[0]])
             .setIcon(L.divIcon({
+                // Instillinger for ikon
                 html: `<div style="font-size: 32px;">💧</div>`,
                 className: "",
                 iconSize: [64, 64],
@@ -313,7 +336,9 @@ async function createIntersectionMarkers() {
             .bindPopup("Markert område er i flomsone");
         
         intersectionMarkers.addLayer(marker);
-    });
+
+        markerToDrawnLayerMap.set(marker._leaflet_id, drawnLayerId);
+    }
 }
 
 
