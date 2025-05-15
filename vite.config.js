@@ -20,6 +20,6 @@ export default defineConfig({
     },
     assetsInclude: ['**/*.svg', '**/*.png'],
     optimizeDeps: {
-        include: ['leaflet', 'leaflet-draw'],
+        include: ['leaflet'],
     }
 })

@@ -2,6 +2,7 @@ import "leaflet/dist/leaflet.css";
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import L, {type GeoJSON } from 'leaflet';
 import '@geoman-io/leaflet-geoman-free';
+import * as turf from "@turf/turf";
 import { checkFlomLayer, clearIntersections } from "./intersections";
 import RBush from "rbush";
 import {BBoxEntry, Brannstasjon, KvikkleireFaresone} from "./Types";
@@ -78,15 +79,12 @@ export class MapManager {
             layer.options.pmIgnore = false;
             L.PM.reInitLayer(layer);
             this.drawnItems.addLayer(layer);
+            void checkFirestationDistance(layer);
             return checkFlomLayer(layer);
         });
 
         // Rediger
         this.drawnItems.on("pm:update", ({layer}) => {
-            void clearIntersections(layer);
-            return checkFlomLayer(layer);
-        });
-        this.drawnItems.on("pm:cut", ({layer}) => {
             void clearIntersections(layer);
             return checkFlomLayer(layer);
         });
@@ -446,4 +444,55 @@ async function addBrannstasjonerToMap(brannstasjoner: Brannstasjon[]) {
             console.error('Failed to parse geometry:', e);
         }
     });
+}
+
+async function checkFirestationDistance(layer: L.Layer) {
+    if (MapManager.brannstasjonerLayer && (document.getElementById('toggleBrannstasjoner') as HTMLInputElement)?.checked) {
+        const brannstasjoner: { point: turf.helpers.Feature<turf.helpers.Point>; data: L.Layer }[] = [];
+
+        MapManager.brannstasjonerLayer.eachLayer(stasjon => {
+            const geoJSON = stasjon.toGeoJSON() as GeoJSON.Feature;
+            if (geoJSON.geometry && geoJSON.geometry.type === 'Point') {
+                brannstasjoner.push({
+                    point: turf.point(geoJSON.geometry.coordinates),
+                    data: stasjon
+                });
+            }
+        });
+
+        const drawnGeoJSON = layer.toGeoJSON() as GeoJSON.Feature;
+
+        const point = drawnGeoJSON.geometry.type === 'Point'
+            ? turf.point(drawnGeoJSON.geometry.coordinates)
+            : turf.centroid(drawnGeoJSON.geometry as GeoJSON.MultiPoint);
+
+        let nearestStation: L.Layer | null = null;
+        let minDistance = Infinity;
+
+        brannstasjoner.forEach(station => {
+            const distance = turf.distance(point, station.point, { units: 'kilometers' });
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestStation = station.data;
+            }
+        });
+
+        if (nearestStation) {
+            const stationGeoJSON = (nearestStation as L.Layer).toGeoJSON() as GeoJSON.Feature;
+            const stationName = stationGeoJSON.properties?.brannstasjonNavn || 'Ukjent brannstasjon';
+            const stationDepartment = stationGeoJSON.properties?.brannvesenNavn || 'Ukjent brannvesen';
+
+            layer.bindTooltip(`
+                <strong>Nærmeste brannstasjon:</strong><br>
+                ${stationName}<br>
+                ${stationDepartment}<br>
+                Avstand: ${minDistance.toFixed(2)} km
+            `, {
+                permanent: true,
+                direction: 'top',
+                className: 'distance-tooltip',
+                offset: [0, -40]
+            });
+        }
+    }
 }
