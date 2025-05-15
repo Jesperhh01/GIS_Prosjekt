@@ -161,37 +161,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (this.checked) {
-            const bounds = MapManager.map.getBounds();
-            const response = await fetch(`/api/Map/kvikkleire?minLat=${bounds.getSouth()}&minLng=${bounds.getWest()}&maxLat=${bounds.getNorth()}&maxLng=${bounds.getEast()}`, {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            if (!response.ok) {
-                console.error('Failed to fetch kvikkleire data');
-                return;
+            MapManager.map.on('zoomend', handleKvikkleireZoomAndMove);
+            MapManager.map.on('moveend', handleKvikkleireZoomAndMove);
+            const data = await fetchKvikkleire();
+            if (data) {
+                await addKvikkleireToMap(data);
             }
-            const faresoner: KvikkleireFaresone[] = await response.json();
-
-            faresoner.forEach(faresone => {
-                try {
-                    const geoJSON = JSON.parse(faresone.geometry);
-                    console.log('Parsed GeoJSON:', geoJSON); // Debug log
-                    MapManager.kvikkLeire.addData(geoJSON);
-                } catch (e) {
-                    console.error('Failed to parse geometry:', e);
-                }
-            });
+            MapManager.kvikkLeire?.eachLayer(async (layer) => layer.addTo(MapManager.map));
         } else {
-            MapManager.kvikkLeire.clearLayers();
+            MapManager.kvikkLeire?.eachLayer(async layer => MapManager.map.removeLayer(layer));
+            // Skru av kvikkleire oppdatering
+            MapManager.map.off('zoomend', handleKvikkleireZoomAndMove);
+            MapManager.map.off('moveend', handleKvikkleireZoomAndMove);
         }
     });
 
     // Håndter synlighet via checkboxene
     document.getElementById('toggleFlom')?.addEventListener('change', async function (this: HTMLInputElement) {
         if (this.checked) {
-            MapManager.map.on('zoomend', handleZoomAndMove);
-            MapManager.map.on('moveend', handleZoomAndMove);
+            MapManager.map.on('zoomend', handleFlomZoomAndMove);
+            MapManager.map.on('moveend', handleFlomZoomAndMove);
             const currentZoom = MapManager.map.getZoom();
             if (currentZoom >= MapManager.ZOOM_THRESHOLD) {
                 MapManager.flomLayer?.eachLayer((layer) => layer.addTo(MapManager.map));
@@ -203,19 +192,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             MapManager.flomLayer?.eachLayer(layer => MapManager.map.removeLayer(layer));
             MapManager.lowResFlomLayer?.eachLayer(layer => MapManager.map.removeLayer(layer));
-            // Skru av flom
-            MapManager.map.off('zoomend', handleZoomAndMove);
-            MapManager.map.off('moveend', handleZoomAndMove);
+            // Skru av flom oppdatering
+            MapManager.map.off('zoomend', handleFlomZoomAndMove);
+            MapManager.map.off('moveend', handleFlomZoomAndMove);
         }
     });
 
     MapManager.lowResFlomLayer?.eachLayer((layer) => layer.addTo(MapManager.map));
-    MapManager.map.on('zoomend', handleZoomAndMove);
+    MapManager.map.on('zoomend', handleFlomZoomAndMove);
     void loadFlomtiles();
 });
 
-// Oppdater Kart ved bevegelse eller zooming
-async function handleZoomAndMove() {
+// Oppdater Flomkart ved bevegelse eller zooming
+async function handleFlomZoomAndMove() {
     const currentZoom = MapManager.map.getZoom();
     if (currentZoom >= MapManager.ZOOM_THRESHOLD) {
         // Fjern lav oppløsning av flomdata når zoom er over grensen
@@ -234,6 +223,15 @@ async function handleZoomAndMove() {
         MapManager.highRes = false;
         toggleController();
         MapManager.lowResFlomLayer?.eachLayer((layer) => layer.addTo(MapManager.map));
+    }
+}
+
+// Oppdater flomkart ved bevegelse eller zooming
+async function handleKvikkleireZoomAndMove() {
+    const data = await fetchKvikkleire();
+    if (data) {
+        MapManager.kvikkLeire?.clearLayers();
+        await addKvikkleireToMap(data);
     }
 }
 
@@ -346,4 +344,30 @@ async function addFeatureFromServer(feature: GeoJSON.Feature) {
 function toggleController() {
     MapManager.map.pm.Toolbar.setButtonDisabled("drawRectangle", !MapManager.highRes);
     MapManager.map.pm.Toolbar.setButtonDisabled("drawPolygon", !MapManager.highRes);
+}
+
+async function fetchKvikkleire(): Promise<KvikkleireFaresone[] | undefined> {
+    const bounds = MapManager.map.getBounds();
+    const zoom = MapManager.map.getZoom();
+    const response = await fetch(`/api/Map/kvikkleire?minLat=${bounds.getSouth()}&minLng=${bounds.getWest()}&maxLat=${bounds.getNorth()}&maxLng=${bounds.getEast()}&zoom=${zoom}`, {
+        headers: {
+            'Accept': 'application/json'
+        }
+    });
+    if (!response.ok) {
+        console.error('Failed to fetch kvikkleire data');
+        return;
+    }
+    return response.json();
+}
+
+async function addKvikkleireToMap(faresoner: KvikkleireFaresone[]) {
+    faresoner.forEach(faresone => {
+        try {
+            const geoJSON = JSON.parse(faresone.geometry);
+            MapManager.kvikkLeire.addData(geoJSON);
+        } catch (e) {
+            console.error('Failed to parse geometry:', e);
+        }
+    });
 }

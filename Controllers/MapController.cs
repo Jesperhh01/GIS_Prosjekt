@@ -67,13 +67,31 @@ public class MapController : ControllerBase
         [FromQuery] double minLat,
         [FromQuery] double minLng,
         [FromQuery] double maxLat,
-        [FromQuery] double maxLng)
+        [FromQuery] double maxLng,
+        [FromQuery] int zoom)
     {
-
-        var conn = RequestDatabase();
+        await using var conn = RequestDatabase();
 
         var sql = @"
-            SELECT objid, objtype, ST_AsGeoJSON(grense) as geometry
+            SELECT 
+                objid, 
+                objtype, 
+                ST_AsGeoJSON(
+                    ST_Transform(
+                        COALESCE(
+                            ST_SimplifyPreserveTopology(
+                                ST_BuildArea(grense),
+                                CASE 
+                                    WHEN :zoom >= 12 THEN 0 
+                                    WHEN :zoom >= 8 THEN 15
+                                    ELSE 25
+                                END
+                            ),
+                            ST_Buffer(grense, 0.000001)
+                        ),
+                        4326
+                    )
+                ) as geometry
             FROM kvikkleire_669727049c5c4c3b8b6269676f1fab53.kvikkleirefaresoneavgr
             WHERE ST_Intersects(
                 grense,
@@ -92,6 +110,7 @@ public class MapController : ControllerBase
         cmd.Parameters.AddWithValue("minLat", NpgsqlTypes.NpgsqlDbType.Double, minLat);
         cmd.Parameters.AddWithValue("maxLng", NpgsqlTypes.NpgsqlDbType.Double, maxLng);
         cmd.Parameters.AddWithValue("maxLat", NpgsqlTypes.NpgsqlDbType.Double, maxLat);
+        cmd.Parameters.AddWithValue("zoom", NpgsqlTypes.NpgsqlDbType.Integer, zoom);
         
         using var reader = await cmd.ExecuteReaderAsync();
         

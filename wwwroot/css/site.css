@@ -189,3 +189,30 @@ footer {
   text-align: justify;
   color: #444; 
 }
+
+.map-legend {
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    margin-right: 8px;
+    border: 1px solid rgba(0,0,0,0.2);
+    opacity: 0.7;
+}
+
+.legend-label {
+    font-size: 14px;
+}
+
