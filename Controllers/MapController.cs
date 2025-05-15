@@ -1,34 +1,43 @@
-using System.Text.Json.Nodes;
 using GIS_Prosjekt.Models;
-using Microsoft.AspNetCore.Mvc.Diagnostics;
 
 namespace GIS_Prosjekt.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using System.Text.Json;
 
-
-
 [ApiController]
 [Route("api/[controller]")]
 public class MapController : ControllerBase
 {
+    private readonly IConfiguration _configuration;
+
+    public MapController(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
+    private NpgsqlConnection RequestDatabase()
+    {
+        var connString = _configuration.GetConnectionString("DefaultConnection");
+        var conn = new NpgsqlConnection(connString);
+        conn.Open();
+        return conn;
+    }
+    
     [HttpPost("features")]
     public IActionResult GetFeatures([FromBody] FlomFeatureRequest request) 
     {
         if (request?.LokalIds == null || request.LokalIds.Count == 0)
             return BadRequest(new { error = "Mangler lokalIds" });
 
-        var connString = "Host=localhost;Port=5432;Username=postgres;Password=solsikke123;Database=geodata";
-        using var conn = new NpgsqlConnection(connString);
-        conn.Open();
+        var conn = RequestDatabase();
 
         // Kun hent basert på ID-er – all bounding skjer i klienten
         var sql = @"
         SELECT lokalid, ST_AsGeoJSON(geom) AS geojson
         FROM flomfeatures
         WHERE lokalid = ANY(@ids);
-    ";
+        ";
 
         using var cmd = new NpgsqlCommand(sql, conn);
         cmd.Parameters.Add(new NpgsqlParameter<string[]>("ids", request.LokalIds.ToArray()));
@@ -51,5 +60,104 @@ public class MapController : ControllerBase
             type     = "FeatureCollection",
             features = features
         });
+    }
+    
+    [HttpGet("kvikkleire")]
+    public async Task<IActionResult> GetKvikkleire(
+        [FromQuery] double minLat,
+        [FromQuery] double minLng,
+        [FromQuery] double maxLat,
+        [FromQuery] double maxLng,
+        [FromQuery] int zoom)
+    {
+        await using var conn = RequestDatabase();
+
+        var sql = @"
+            SELECT 
+                objid, 
+                objtype, 
+                ST_AsGeoJSON(
+                    ST_Transform(
+                        COALESCE(
+                            ST_SimplifyPreserveTopology(
+                                ST_BuildArea(grense),
+                                CASE 
+                                    WHEN :zoom >= 12 THEN 0 
+                                    WHEN :zoom >= 8 THEN 15
+                                    ELSE 25
+                                END
+                            ),
+                            ST_Buffer(grense, 0.000001)
+                        ),
+                        4326
+                    )
+                ) as geometry
+            FROM kvikkleire_669727049c5c4c3b8b6269676f1fab53.kvikkleirefaresoneavgr
+            WHERE ST_Intersects(
+                grense,
+                ST_Transform(
+                    ST_MakeEnvelope(:minLng, :minLat, :maxLng, :maxLat, 4326),
+                    25833
+                )
+            )
+            LIMIT 1000;
+        ";
+
+        var results = new List<KvikkleireFaresone>();
+        
+        using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("minLng", NpgsqlTypes.NpgsqlDbType.Double, minLng);
+        cmd.Parameters.AddWithValue("minLat", NpgsqlTypes.NpgsqlDbType.Double, minLat);
+        cmd.Parameters.AddWithValue("maxLng", NpgsqlTypes.NpgsqlDbType.Double, maxLng);
+        cmd.Parameters.AddWithValue("maxLat", NpgsqlTypes.NpgsqlDbType.Double, maxLat);
+        cmd.Parameters.AddWithValue("zoom", NpgsqlTypes.NpgsqlDbType.Integer, zoom);
+        
+        using var reader = await cmd.ExecuteReaderAsync();
+        
+        while (await reader.ReadAsync())
+        {
+            results.Add(new KvikkleireFaresone
+            {
+                ObjId = reader.GetInt32(0),
+                ObjType = reader.GetString(1),
+                Geometry = reader.GetString(2)
+            });
+        }
+
+        return Ok(results);
+    }
+    
+    [HttpGet("brannstasjoner")]
+    public async Task<IActionResult> GetBrannstasjoner()
+    {
+        using var conn = RequestDatabase();
+
+        var sql = @"
+        SELECT 
+            objid,
+            ST_AsGeoJSON(ST_Transform(posisjon, 4326)) as geometry,
+            brannstasjon,
+            brannvesen
+        FROM brannstasjoner_f4c767a1e8fe41d2b08921a7e9dcbf2b.brannstasjon
+        ";
+
+        var results = new List<Brannstasjon>();
+
+        await using var cmd = new NpgsqlCommand(sql, conn);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+    
+        while (await reader.ReadAsync())
+        {
+            results.Add(new Brannstasjon
+            {
+                ObjId = reader.GetInt32(0),
+                Geometry = reader.GetString(1),
+                BrannstasjonNavn = reader.IsDBNull(2) ? null : reader.GetString(2),
+                BrannvesenNavn = reader.IsDBNull(3) ? null : reader.GetString(3)
+            });
+        }
+
+        return Ok(results);
     }
 }
