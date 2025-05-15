@@ -28,3 +28,10 @@ export interface KvikkleireFaresone {
     objType: string;
     geometry: string;  // GeoJSON string
 }
+
+export interface Brannstasjon {
+    objId: number;
+    geometry: string;
+    brannstasjonNavn?: string;
+    brannvesenNavn?: string;
+}

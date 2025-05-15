@@ -4,7 +4,7 @@ import L, {type GeoJSON } from 'leaflet';
 import '@geoman-io/leaflet-geoman-free';
 import { checkFlomLayer, clearIntersections } from "./intersections";
 import RBush from "rbush";
-import {BBoxEntry, KvikkleireFaresone} from "./Types";
+import {BBoxEntry, Brannstasjon, KvikkleireFaresone} from "./Types";
 
 // Statisk klasse som inneholder kart, lag og instillinger
 export class MapManager {
@@ -15,6 +15,7 @@ export class MapManager {
     static ZOOM_THRESHOLD = 12;
     static lowResFlomLayer: L.GeoJSON | null;
     static highRes = false;
+    static brannstasjonerLayer: L.GeoJSON;
 
     static async initialize() {
         // Unngå duplikat initialisering
@@ -366,6 +367,81 @@ async function addKvikkleireToMap(faresoner: KvikkleireFaresone[]) {
         try {
             const geoJSON = JSON.parse(faresone.geometry);
             MapManager.kvikkLeire.addData(geoJSON);
+        } catch (e) {
+            console.error('Failed to parse geometry:', e);
+        }
+    });
+}
+
+document.getElementById('toggleBrannstasjoner')?.addEventListener('change', async function (this: HTMLInputElement) {
+    if (!MapManager.brannstasjonerLayer) {
+        MapManager.brannstasjonerLayer = L.geoJSON(null, {
+            pointToLayer: (feature, latlng) => {
+                return L.marker(latlng, {
+                    icon: L.divIcon({        
+                        // Instillinger for ikon
+                        html: `<div style="font-size: 32px;">🚒</div>`,
+                        className: "",
+                        iconSize: [64, 64],
+                        iconAnchor: [32, 32],
+                        popupAnchor: [-2, -20]
+                    })
+            })
+            },
+            onEachFeature: (feature, layer) => {
+                if (feature.properties) {
+                    layer.bindPopup(`
+                        <strong>${feature.properties.brannstasjonNavn || 'Ukjent brannstasjon'}</strong><br>
+                        ${feature.properties.brannvesenNavn || 'Ukjent brannvesen'}
+                    `);
+                }
+            }
+        }).addTo(MapManager.map);
+    }
+
+    if (this.checked) {
+        const data = await fetchBrannstasjoner();
+        if (data) {
+            await addBrannstasjonerToMap(data);
+        }
+    } else {
+        MapManager.brannstasjonerLayer.clearLayers();
+    }
+});
+
+async function fetchBrannstasjoner(): Promise<Brannstasjon[] | undefined> {
+    const response = await fetch(
+        `/api/Map/brannstasjoner`,
+        {
+            headers: {
+                'Accept': 'application/json'
+            }
+        }
+    );
+    if (!response.ok) {
+        console.error('Failed to fetch brannstasjoner data');
+        return;
+    }
+    const data = await response.json();
+    if (data) {
+        MapManager.brannstasjonerLayer.clearLayers();
+        await addBrannstasjonerToMap(data);
+    }
+}
+
+async function addBrannstasjonerToMap(brannstasjoner: Brannstasjon[]) {
+    brannstasjoner.forEach(stasjon => {
+        try {
+            const geoJSON = JSON.parse(stasjon.geometry);
+            const feature = {
+                type: "Feature",
+                properties: {
+                    brannstasjonNavn: stasjon.brannstasjonNavn,
+                    brannvesenNavn: stasjon.brannvesenNavn
+                },
+                geometry: geoJSON
+            };
+            MapManager.brannstasjonerLayer.addData(feature as GeoJSON.Feature);
         } catch (e) {
             console.error('Failed to parse geometry:', e);
         }

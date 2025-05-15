@@ -126,4 +126,38 @@ public class MapController : ControllerBase
 
         return Ok(results);
     }
+    
+    [HttpGet("brannstasjoner")]
+    public async Task<IActionResult> GetBrannstasjoner()
+    {
+        using var conn = RequestDatabase();
+
+        var sql = @"
+        SELECT 
+            objid,
+            ST_AsGeoJSON(ST_Transform(posisjon, 4326)) as geometry,
+            brannstasjon,
+            brannvesen
+        FROM brannstasjoner_f4c767a1e8fe41d2b08921a7e9dcbf2b.brannstasjon
+        ";
+
+        var results = new List<Brannstasjon>();
+
+        await using var cmd = new NpgsqlCommand(sql, conn);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+    
+        while (await reader.ReadAsync())
+        {
+            results.Add(new Brannstasjon
+            {
+                ObjId = reader.GetInt32(0),
+                Geometry = reader.GetString(1),
+                BrannstasjonNavn = reader.IsDBNull(2) ? null : reader.GetString(2),
+                BrannvesenNavn = reader.IsDBNull(3) ? null : reader.GetString(3)
+            });
+        }
+
+        return Ok(results);
+    }
 }

@@ -15,3 +15,10 @@ public class KvikkleireFaresone
     public string Geometry { get; set; }  // This will hold the GeoJSON string
 }
 
+public class Brannstasjon
+{
+    public int ObjId { get; set; }
+    public string? Geometry { get; set; }
+    public string? BrannstasjonNavn { get; set; }
+    public string? BrannvesenNavn { get; set; }
+}
