@@ -16,3 +16,7 @@ obj/
 
 # Mac
 .DS_Store
+/node_modules/*
+.vite/*
+
+wwwroot/js/
