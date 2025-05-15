@@ -21,13 +21,16 @@ const flomLayer = L.geoJSON(null, {
 }).addTo(map);
 
 // Beholder for veidata (IKKE legg til kartet ennå)
-const veiLayer = L.geoJSON(null, {
-    style: {
-        color: '#ffb200',      // Farge på polygonkant
-        weight: 2,             // Tykkelse på kantlinje
-        fillOpacity: 0.3       // Gjennomsiktighet på innsiden
-    }
+const mastLayer = L.geoJSON(null, {
+    pointToLayer: (feature, latlng) =>
+        L.circleMarker(latlng, { radius: 5, color: '#ffb200', fillOpacity: 0.8 })
 });
+
+async function loadFlomtiles() {
+    return flomManager.loadTiles(map);
+}
+
+let mastSpatialTree = null;
 
 // Funksjonen kjører når DOM-innhold er lastet.
 document.addEventListener('DOMContentLoaded', async function () {
@@ -37,20 +40,18 @@ document.addEventListener('DOMContentLoaded', async function () {
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-
-
+    
     // Henter feature_index.json fra lokal server
     // Henter veier_kristiansand.geojson fra lokal server
-    const [featureIndexRes, veierRes] = await Promise.all([
-        fetch('/feature_index.json'),
-        fetch('/geodata/veier_kristiansand.geojson')
-    ]);
-    // Henter JSON fra responsene
-    const [featureIndexJson, veierJson] = await Promise.all([
-        featureIndexRes.json(),
-        veierRes.json()
-    ]);
-
+    // Hent én enkelt URL
+    const featureIndexRes  = await fetch('/feature_index.json');
+// Sjekk at det gikk fint
+    if (!featureIndexRes.ok) {
+        throw new Error('Kunne ikke hente feature_index.json: ' + featureIndexRes.status);
+    }
+// Parse JSON
+    const featureIndexJson = await featureIndexRes.json();
+    
     // Gjør hver entry klar for spatial søk
     const entries = featureIndexJson.map(e => ({
         minX: e.bbox[0],
@@ -66,23 +67,74 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Nå kan du bruke spatialTree til å hente synlige IDs
     loadFlomtiles(); // start
 
-    // legg data inn i laget
-    veiLayer.addData(veierJson);
+    await (async function initMastIndex() {
+        const mastIndex = await fetch('/feature_index_master.json').then(r => r.json());
+        mastSpatialTree = new RBush();
+        mastSpatialTree.load(
+            mastIndex.map(e => ({
+                minX: e.bbox[0],
+                minY: e.bbox[1],
+                maxX: e.bbox[2],
+                maxY: e.bbox[3],
+                id: e.id
+            }))
+        );
+        console.log('✅ mastSpatialTree klar med', mastSpatialTree.all().length, 'entries');
+    })();
+    console.log(
+        'master treff:',
+        mastSpatialTree.search({
+            minX: map.getBounds().getWest(),
+            minY: map.getBounds().getSouth(),
+            maxX: map.getBounds().getEast(),
+            maxY: map.getBounds().getNorth(),
+        })
+    );
+
+    fetch('/feature_index_master.json')
+        .then(r => r.json())
+        .then(idx => {
+            console.log('✅ Antall poster i master-index:', idx.length);
+            console.log('❓ Første 5 boksedefinisjoner (bbox):', idx.slice(0,5).map(e => e.bbox));
+        });
+
+    console.log('🌍 Map bounds:', map.getBounds().toBBoxString(), map.getBounds());
+
 
     // Toggle synlighet for veier
-    document.getElementById('toggleVeier').addEventListener('change', function () {
+    document.getElementById('toggleMaster').addEventListener('change', function () {
         if (this.checked) {
-            map.addLayer(veiLayer);
+            map.addLayer(mastLayer);
+            mastManager.loadTiles(map);
         } else {
-            map.removeLayer(veiLayer);
+            map.removeLayer(mastLayer);
+            mastLayer.clearLayers();
+        }
+    });
+    
+    const toggleMaster = document.getElementById('toggleMaster');
+    toggleMaster.addEventListener('change', async function () {
+        if (this.checked) {
+            map.addLayer(mastLayer);
+            await mastManager.loadTiles(map);
+        } else {
+            map.removeLayer(mastLayer);
+            mastLayer.clearLayers();
         }
     });
 
+    // Last én gang hvis avhuket ved start
+    if (toggleMaster.checked) {
+        map.addLayer(mastLayer);
+        await mastManager.loadTiles(map);
+    }
+    
     let debounceTimer;
     map.on('moveend', () => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
             loadFlomtiles();
+            mastManager.loadTiles(map);
         }, 100); // venter 0.1 sek etter bevegelse
     });
 
@@ -99,18 +151,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Kjør første gang
     await loadFlomtiles();
 });
-
-// Regner ut synlige flomdata basert på kartutsnitt
-function getVisibleLokalIds(bounds) {
-    const results = spatialTree.search({
-        minX: bounds.getWest(),
-        minY: bounds.getSouth(),
-        maxX: bounds.getEast(),
-        maxY: bounds.getNorth()
-    });
-
-    return results.map(r => r.lokalId);
-}
 
 const layerStyle = {
     style: {
@@ -131,81 +171,6 @@ const SIMPLIFICATION_TOLERANCES = {
     MEDIUM: 0.001, // Medium simplification
     LOW: 0.005    // High simplification
 };
-
-async function loadFlomtiles() {
-    const bounds = map.getBounds();
-    const currentZoom = map.getZoom();
-    const visibleIds = new Set(getVisibleLokalIds(bounds));
-
-    layerStyle.weight = currentZoom >= ZOOM_LEVEL_THRESHOLDS.MEDIUM 
-        ? 2 
-        : 1;
-    layerStyle.fillOpacity = currentZoom >= ZOOM_LEVEL_THRESHOLDS.MEDIUM 
-        ? 0.3 
-        : 0.2;
-
-    const idsToRemove = [...activeTiles.keys()].filter(id => !visibleIds.has(id));
-    for (const id of idsToRemove) {
-        const layer = activeTiles.get(id);
-        flomLayer.removeLayer(layer);
-        activeTiles.delete(id);
-    }
-
-    const toAdd = [...visibleIds].filter(id => !activeTiles.has(id));
-    const {fromCache, toFetch} = toAdd.reduce((acc, id) => {
-        tileCache.has(id) ? acc.fromCache.push(id) : acc.toFetch.push(id);
-        return acc;
-    }, { fromCache: [], toFetch: [] });
-
-    if (toFetch.length > 0) {
-        console.log("toFetch:", toFetch);
-        const mapFeaturesRes = await fetch('/api/map/features', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                lokalIds: toFetch,
-                simplificationLevel: getSimplificationLevel(currentZoom)
-            })
-        });
-        const featureCollection = await mapFeaturesRes.json();
-
-        // Nå har vi GeoJSON-featureCollection
-        // For hver feature:
-        void Promise.all([
-            ...featureCollection.features.map(addFeatureFromServer),
-            ...fromCache.map(addFeatureFromCache)
-        ]);
-    }
-    
-    else {
-        void Promise.all(fromCache.map(addFeatureFromCache));
-    }
-}
-
-function getSimplificationLevel(zoom) {
-    if (zoom >= ZOOM_LEVEL_THRESHOLDS.HIGH) {
-        return SIMPLIFICATION_TOLERANCES.HIGH;
-    } else if (zoom >= ZOOM_LEVEL_THRESHOLDS.MEDIUM) {
-        return SIMPLIFICATION_TOLERANCES.MEDIUM;
-    } else {
-        return SIMPLIFICATION_TOLERANCES.LOW;
-    }
-}
-
-async function addFeatureFromCache(id) {
-    const feature = tileCache.get(id); // GeoJSON-data
-    const layer = L.geoJSON(feature, layerStyle).addTo(flomLayer); // Tegner i kartet
-    activeTiles.set(id, layer); // Husk at vi har tegnet denne
-}
-
-async function addFeatureFromServer(feature) {
-    const id = feature.properties.lokalId;
-    tileCache.set(id, feature); // lagre i cache
-    const layer = L.geoJSON(feature, layerStyle).addTo(flomLayer); // legg i kartet
-    activeTiles.set(id, layer); // registrer at den er tegnet
-}
 
 // Lag draw kontroller, legg til i kartet
 map.addControl(new L.Control.Draw({
@@ -340,5 +305,157 @@ async function markIntersections(filteredPoints, drawnLayerId) {
         markerToDrawnLayerMap.set(marker._leaflet_id, drawnLayerId);
     }
 }
+
+function createLayerManager(options) {
+    const {
+        apiUrl,
+        layer,
+        style,
+        spatialTree,
+        zoomThresholds,
+        simplificationLevels,
+        idParam   = 'lokalIds',
+        idField   = 'lokalId',
+        simpleLoad = false
+    } = options;
+
+    const tileCache   = new Map();
+    const activeTiles = new Map();
+
+    function getVisibleIds(bounds) {
+        return spatialTree
+            .search({
+                minX: bounds.getWest(),
+                minY: bounds.getSouth(),
+                maxX: bounds.getEast(),
+                maxY: bounds.getNorth()
+            })
+            .map(r => r[idField]);
+    }
+
+    function getSimplificationLevel(zoom) {
+        if (zoom >= zoomThresholds.HIGH)   return simplificationLevels.HIGH;
+        if (zoom >= zoomThresholds.MEDIUM) return simplificationLevels.MEDIUM;
+        return simplificationLevels.LOW;
+    }
+
+    async function addFromServer(feature) {
+        const id = feature.properties[idField];
+        tileCache.set(id, feature);
+
+        const geoOpts = { style };
+        if (layer.options && layer.options.pointToLayer) {
+            geoOpts.pointToLayer = layer.options.pointToLayer;
+        }
+
+        const lyr = L.geoJSON(feature, geoOpts).addTo(layer);
+        activeTiles.set(id, lyr);
+    }
+
+    async function addFromCache(id) {
+        const feature = tileCache.get(id);
+        const geoOpts = { style };
+        if (layer.options && layer.options.pointToLayer) {
+            geoOpts.pointToLayer = layer.options.pointToLayer;
+        }
+        const lyr = L.geoJSON(feature, geoOpts).addTo(layer);
+        activeTiles.set(id, lyr);
+    }
+
+    async function loadTiles(map) {
+        const bounds = map.getBounds();
+        const zoom   = map.getZoom();
+        const visible = new Set(getVisibleIds(bounds));
+
+        // remove layers no longer visible
+        for (const id of activeTiles.keys()) {
+            if (!visible.has(id)) {
+                layer.removeLayer(activeTiles.get(id));
+                activeTiles.delete(id);
+            }
+        }
+
+        // simple one-shot loader
+        if (simpleLoad) {
+            const toFetch   = [...visible].filter(id => !tileCache.has(id));
+            const fromCache = [...visible].filter(id =>  tileCache.has(id));
+
+            // draw cache
+            await Promise.all(fromCache.map(addFromCache));
+
+            if (toFetch.length) {
+                const payload = {
+                    [idParam]:             toFetch,
+                    simplificationLevel:   getSimplificationLevel(zoom)
+                };
+                const res = await fetch(apiUrl, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify(payload)
+                });
+                const fc = await res.json();
+                await Promise.all(fc.features.map(addFromServer));
+            }
+            return;
+        }
+
+        // chunked loader for large sets
+        const CHUNK = 500;
+        const ids   = [...visible];
+        for (let i = 0; i < ids.length; i += CHUNK) {
+            const slice = ids.slice(i, i + CHUNK);
+            const fromCache = slice.filter(id => tileCache.has(id));
+            fromCache.forEach(addFromCache);
+
+            const toFetch = slice.filter(id => !tileCache.has(id));
+            if (!toFetch.length) continue;
+
+            const payload = {
+                [idParam]:           toFetch,
+                simplificationLevel: getSimplificationLevel(zoom)
+            };
+            const res = await fetch(apiUrl, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify(payload)
+            });
+            if (!res.ok) continue;
+            const fc = await res.json();
+            if (fc.features) {
+                await Promise.all(fc.features.map(addFromServer));
+            }
+        }
+    }
+
+    return { loadTiles };
+}
+
+const flomManager = createLayerManager({
+    apiUrl: '/api/map/features',
+    layer: flomLayer,
+    style: {
+        color: '#0077ff',
+        weight: 2,
+        fillOpacity: 0.3
+    },
+    spatialTree: spatialTree, // eller flomIndex
+    zoomThresholds: ZOOM_LEVEL_THRESHOLDS,
+    simplificationLevels: SIMPLIFICATION_TOLERANCES,
+    simpleLoad: true
+});
+
+const mastManager = createLayerManager({
+    apiUrl: '/api/map/master',
+    layer: mastLayer,
+    style: { color: '#ffb200', weight: 2, fillOpacity: 0.3 },
+    spatialTree: { // vi gir et lite wrapper-objekt istedenfor ‘roadSpatialTree’ direkte
+        search: (bbox) => mastSpatialTree.search(bbox).map(r => ({ lokalId: r.id }))
+    },
+    zoomThresholds: ZOOM_LEVEL_THRESHOLDS,
+    simplificationLevels: SIMPLIFICATION_TOLERANCES,
+    idParam: 'masterIds',
+    idField: 'lokalId',
+    simpleLoad: false
+});
 
 
