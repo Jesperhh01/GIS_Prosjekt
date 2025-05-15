@@ -1,19 +1,26 @@
 import "leaflet/dist/leaflet.css";
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
-import L, { type GeoJSON } from 'leaflet';
+import L, {type GeoJSON} from 'leaflet';
 import '@geoman-io/leaflet-geoman-free';
 import { checkFlomLayer, clearIntersections } from "./intersections";
 import RBush from "rbush";
 import { BBoxEntry } from "./Types";
 
+// Statisk klasse som inneholder kart, lag og instillinger
 export class MapManager {
     static map: L.Map;
     static flomLayer: L.GeoJSON;
     static drawnItems: L.FeatureGroup<any>;
+    static kvikkLeire: L.GeoJSON;
+    static ZOOM_THRESHOLD = 12;
+    static lowResFlomLayer: L.GeoJSON | null;
+    static highRes = false;
 
     static async initialize() {
-        if (this.map || document.getElementById("map")?.children.length) return; // Prevent multiple initializations
+        // Unngå duplikat initialisering
+        if (this.map || document.getElementById("map")?.children.length) return;
 
+        // Oslo
         this.map = L.map('map').setView([59.91, 10.75], 10);
         this.flomLayer = L.geoJSON(null, {
             pmIgnore: true,
@@ -33,10 +40,10 @@ export class MapManager {
             allowSelfIntersectionEdit: false,
             allowEditing: true,
         })
-        MapManager.map.addLayer(this.drawnItems as L.Layer);
+        this.map.addLayer(this.drawnItems as L.Layer);
 
         // Lag draw kontroller, legg til i kartet
-        MapManager.map.pm.addControls({
+        this.map.pm.addControls({
             position: "topleft",
             drawCircle: false,
             drawMarker: false,
@@ -44,15 +51,28 @@ export class MapManager {
             drawRectangle: true,
             drawCircleMarker: false,
             drawPolygon: true,
-            editMode: true,      // Enable edit mode
-            dragMode: true,      // Enable dragging of shapes
-            removalMode: true,   // Enable removal of shapes
+            editMode: true,      
+            dragMode: true,     
+            removalMode: true,
             snappingOption: false,
             rotateMode: false,
+            cutPolygon: false
+        });
+        this.map.pm.setGlobalOptions({
+            pathOptions: {
+                color: '#ff6200',          
+                fillColor: '#ff6200',      
+                fillOpacity: 0.4,          
+                weight: 2,                 
+            }
         })
 
+        // Skru av tegne kontroller til å begynne med
+        this.map.pm.Toolbar.setButtonDisabled("drawRectangle", true);
+        this.map.pm.Toolbar.setButtonDisabled("drawPolygon", true);
+
         // Funksjoner for å håndtere draw-eventer
-        MapManager.map.on("pm:create", async (e) => {
+        this.map.on("pm:create", async (e) => {
             const layer = e.layer;
             layer.options.pmIgnore = false;
             L.PM.reInitLayer(layer);
@@ -62,6 +82,10 @@ export class MapManager {
 
         // Rediger
         this.drawnItems.on("pm:update", ({layer}) => {
+            void clearIntersections(layer);
+            return checkFlomLayer(layer);
+        });
+        this.drawnItems.on("pm:cut", ({layer}) => {
             void clearIntersections(layer);
             return checkFlomLayer(layer);
         });
@@ -80,17 +104,8 @@ const activeTiles = new Map();
 // spatial tre
 const spatialTree = new RBush<BBoxEntry>();
 
-// Beholder for veidata (IKKE legg til kartet ennå)
-const veiLayer = L.geoJSON(null, {
-    style: {
-        color: '#ffb200',      // Farge på polygonkant
-        weight: 2,             // Tykkelse på kantlinje
-        fillOpacity: 0.3       // Gjennomsiktighet på innsiden
-    }
-});
-
 // Funksjonen kjører når DOM-innhold er lastet.
-document.addEventListener('DOMContentLoaded', async function () {
+document.addEventListener('DOMContentLoaded', async () => {
     // Initialiser kart
     await MapManager.initialize();
 
@@ -101,18 +116,28 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Henter feature_index.json fra lokal server
     // Henter veier_kristiansand.geojson fra lokal server
-    const [featureIndexRes, veierRes] = await Promise.all([
+    const [featureIndexRes, flomsonerRes] = await Promise.all([
         fetch('/feature_index.json'),
-        fetch('/geodata/veier_kristiansand.geojson')
+        // Bare lav oppløsning av flomsoner
+        fetch('/geodata/flomsoner.geojson')
     ]);
     // Henter JSON fra responsene
-    const [featureIndexJson, veierJson] = await Promise.all([
+    const [featureIndexJSON, flomsonerJSON] = await Promise.all([
         featureIndexRes.json(),
-        veierRes.json()
+        flomsonerRes.json()
     ]);
 
+    MapManager.lowResFlomLayer = L.geoJSON(flomsonerJSON, {
+        pmIgnore: true,
+        style: {
+            color: '#0077ff',
+            weight: 1,
+            fillOpacity: 0.2
+        }
+    });
+
     // Gjør hver entry klar for spatial søk
-    const entries = featureIndexJson.map((e: BBoxEntry) => ({
+    const entries = featureIndexJSON.map((e: BBoxEntry) => ({
         minX: e.bbox[0],
         minY: e.bbox[1],
         maxX: e.bbox[2],
@@ -123,26 +148,17 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Bygg spatial indeks
     spatialTree.load(entries);
 
-    // Nå kan du bruke spatialTree til å hente synlige IDs
-    void loadFlomtiles(); // start
+    // // Toggle synlighet for kvikkleire
+    // document.getElementById('toggleKvikkleire')?.addEventListener('change', function (this: HTMLInputElement) {
+    //     if (this.checked) {
+    //         MapManager.map.addLayer(kvikkLeire as L.Layer);
+    //     } else {
+    //         MapManager.map.removeLayer(kvikkLeire as L.Layer);
+    //     }
+    // });
 
-    // legg data inn i laget
-    veiLayer.addData(veierJson);
-
-    // Toggle synlighet for veier
-    document.getElementById('toggleVeier')?.addEventListener('change', function (this: HTMLInputElement) {
-        if (this.checked) {
-            MapManager.map.addLayer(veiLayer as L.Layer);
-        } else {
-            MapManager.map.removeLayer(veiLayer as L.Layer);
-        }
-    });
-
-    MapManager.map.on('moveend', () => {
-            setTimeout(() => {  
-                loadFlomtiles();
-            }, 100); // venter 0.1 sek etter bevegelse
-    });
+    MapManager.map.on('zoomend', handleZoomAndMove);
+    MapManager.map.on('moveend', handleZoomAndMove);
 
     // Håndter synlighet via checkboxene
     document.getElementById('toggleFlom')?.addEventListener('change', function (this: HTMLInputElement) {
@@ -154,9 +170,31 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
-    // Kjør første gang
-    await loadFlomtiles();
+    MapManager.lowResFlomLayer?.eachLayer((layer) => layer.addTo(MapManager.map));
 });
+
+// Oppdater Kart ved bevegelse eller zooming
+async function handleZoomAndMove() {
+    const currentZoom = MapManager.map.getZoom();
+    if (currentZoom >= MapManager.ZOOM_THRESHOLD) {
+        // Fjern lav oppløsning av flomdata når zoom er over grensen
+        MapManager.lowResFlomLayer?.eachLayer(async (layer) => MapManager.map.removeLayer(layer));
+        if (!MapManager.highRes) {
+            // Legg til lag om vi ikke allerede har det
+            MapManager.flomLayer?.eachLayer((layer) => layer.addTo(MapManager.map));
+        }
+        MapManager.highRes = true;
+        toggleController();
+        void loadFlomtiles();
+    } else if (currentZoom < MapManager.ZOOM_THRESHOLD) {
+        if (MapManager.highRes) {
+            MapManager.flomLayer.eachLayer(async (layer) => MapManager.map.removeLayer(layer));
+        }
+        MapManager.highRes = false;
+        toggleController();
+        MapManager.lowResFlomLayer?.eachLayer((layer) => layer.addTo(MapManager.map));
+    }
+}
 
 // Regner ut synlige flomdata basert på kartutsnitt
 function getVisibleLokalIds(bounds: L.LatLngBounds) {
@@ -195,13 +233,6 @@ async function loadFlomtiles() {
     const currentZoom = MapManager.map.getZoom();
     const visibleIds = new Set(getVisibleLokalIds(bounds));
 
-    layerStyle.style.weight = currentZoom >= ZOOM_LEVEL_THRESHOLDS.MEDIUM 
-        ? 2 
-        : 1;
-    layerStyle.style.fillOpacity = currentZoom >= ZOOM_LEVEL_THRESHOLDS.MEDIUM 
-        ? 0.3 
-        : 0.2;
-
     const idsToRemove = [...activeTiles.keys()].filter(id => !visibleIds.has(id));
     for (const id of idsToRemove) {
         const layer = activeTiles.get(id);
@@ -223,7 +254,7 @@ async function loadFlomtiles() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                lokalIds: toFetch, 
+                lokalIds: toFetch,
                 simplificationLevel: getSimplificationLevel(currentZoom)
             })
         });
@@ -265,3 +296,8 @@ async function addFeatureFromServer(feature: GeoJSON.Feature) {
     activeTiles.set(id, layer); // registrer at den er tegnet
 }
 
+// Skrur av eller på tegne kontroller
+function toggleController() {
+    MapManager.map.pm.Toolbar.setButtonDisabled("drawRectangle", !MapManager.highRes);
+    MapManager.map.pm.Toolbar.setButtonDisabled("drawPolygon", !MapManager.highRes);
+}

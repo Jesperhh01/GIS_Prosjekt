@@ -11,6 +11,9 @@
   <component name="ChangeListManager">
     <list default="true" id="d4fbc16e-e49c-4463-9793-266c5f14400d" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.GIS_Prosjekt/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GIS_Prosjekt/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Controllers/MapController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Controllers/MapController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/map.ts" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/map.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Views/_ViewImports.cshtml" beforeDir="false" afterPath="$PROJECT_DIR$/Views/_ViewImports.cshtml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,6 +22,14 @@
   </component>
   <component name="DpaMonitoringSettings">
     <option name="firstShow" value="false" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="tsconfig.json" />
+        <option value="TypeScript File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -47,16 +58,26 @@
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}</component>
-  <component name="RunManager" selected=".NET Launch Settings Profile.GIS_Prosjekt: http">
+}]]></component>
+  <component name="RunManager" selected="Compound..NET + Vite">
+    <configuration name=".NET + Vite" type="CompoundRunConfigurationType">
+      <toRun name="GIS_Prosjekt: http" type="LaunchSettings" />
+      <toRun name="dev" type="js.build_tools.npm" />
+      <method v="2" />
+    </configuration>
     <configuration name="GIS_Prosjekt" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="PASS_PARENT_ENVS" value="1" />
       <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="ENV_FILE_PATHS" value="" />
+      <option name="REDIRECT_INPUT_PATH" value="" />
+      <option name="PTY_MODE" value="Auto" />
       <option name="USE_MONO" value="0" />
       <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="AUTO_ATTACH_CHILDREN" value="0" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
       <option name="PROJECT_PATH" value="$PROJECT_DIR$/GIS_Prosjekt/GIS_Prosjekt.csproj" />
       <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
       <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
@@ -97,6 +118,23 @@
         <option name="Build" />
       </method>
     </configuration>
+    <configuration name="dev" type="js.build_tools.npm" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue=".NET Launch Settings Profile.GIS_Prosjekt: http" />
+      <item itemvalue=".NET Launch Settings Profile.GIS_Prosjekt: https" />
+      <item itemvalue=".NET Project.GIS_Prosjekt" />
+      <item itemvalue="Compound..NET + Vite" />
+      <item itemvalue="npm.dev" />
+    </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -112,12 +150,18 @@
       <workItem from="1744107303739" duration="368000" />
       <workItem from="1744107684866" duration="535000" />
       <workItem from="1744108234334" duration="17709000" />
+      <workItem from="1746120736751" duration="252000" />
+      <workItem from="1746826063428" duration="26097000" />
+      <workItem from="1746996980443" duration="3338000" />
+      <workItem from="1747065644334" duration="3317000" />
+      <workItem from="1747232934942" duration="32384000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -132,5 +176,27 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.OperationCanceledException" breakIfHandledByOtherCode="false" displayValue="System.OperationCanceledException" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.Tasks.TaskCanceledException" breakIfHandledByOtherCode="false" displayValue="System.Threading.Tasks.TaskCanceledException" />
+          <option name="timeStamp" value="2" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" breakIfHandledByOtherCode="false" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="3" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>
