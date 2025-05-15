@@ -22,3 +22,9 @@ export interface BBoxEntry {
 }
 
 export type FeatureIndex = BBoxEntry[];
+
+export interface KvikkleireFaresone {
+    objId: number;
+    objType: string;
+    geometry: string;  // GeoJSON string
+}
